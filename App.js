@@ -48,7 +48,7 @@ const App = () => {
   const { width, height } = useWindowDimensions();
   const [score, setScore] = useState(0);
   const [gameState, setGameState] = useState('waiting'); // 'waiting', 'playing', 'gameOver'
-  const [birdColor, setBirdColor] = useState('yellow'); // 'yellow', 'blue', 'red', 'custom0', 'custom1', etc.
+  const [birdColor, setBirdColor] = useState('manas'); // 'yellow', 'blue', 'red', 'manas', 'custom0', 'custom1', etc.
   const [customImages, setCustomImages] = useState([]); // Array of custom image URIs
   const [theme, setTheme] = useState('day'); // 'day', 'night', 'city'
   const [currentPage, setCurrentPage] = useState('game'); // 'game', 'customize', 'devteam'
@@ -64,6 +64,7 @@ const App = () => {
   const yellowBird = useImage(require('./assets/sprites/yellowbird-upflap.png'));
   const blueBird = useImage(require('./assets/sprites/bluebird-upflap.png'));
   const redBird = useImage(require('./assets/sprites/redbird-upflap.png'));
+  const manasBird = useImage(require('./assets/sprites/developers/manas.png'));
   const pipeBottom = useImage(require('./assets/sprites/pipe-green.png'));
   const pipeTop = useImage(require('./assets/sprites/pipe-green-top.png'));
   const base = useImage(require('./assets/sprites/base.png'));
@@ -117,9 +118,17 @@ const App = () => {
 
   // Get current bird based on selection
   const bird = birdColor.startsWith('custom')
-    ? customBirdImages[parseInt(birdColor.replace('custom', ''))] || yellowBird
+    ? customBirdImages[parseInt(birdColor.replace('custom', ''))] || manasBird
     : birdColor === 'blue' ? blueBird :
-      birdColor === 'red' ? redBird : yellowBird;
+      birdColor === 'red' ? redBird :
+      birdColor === 'manas' ? manasBird : yellowBird;
+
+  // Debug log
+  useEffect(() => {
+    console.log('Bird Color:', birdColor);
+    console.log('Manas Bird loaded:', !!manasBird);
+    console.log('Current bird:', !!bird);
+  }, [birdColor, manasBird, bird]);
 
   const gameOver = useSharedValue(false);
   const pipeX = useSharedValue(width);
@@ -611,6 +620,13 @@ const App = () => {
       return;
     }
 
+    // Manas bird
+    if (tapX >= 310 && tapX <= 310 + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+      runOnJS(setBirdColor)('manas');
+      runOnJS(playJumpSound)();
+      return;
+    }
+
     // Custom bird buttons - aligned with default birds positions
     const customPositions = [75, 165, 255, 345]; // Match Yellow, Blue, Red positions + 1 more
     const customBirdStartY = 536;
@@ -765,32 +781,34 @@ const App = () => {
           />
 
           {/* Bird */}
-          <Group transform={birdTransform} origin={birdOrigin}>
-            {birdColor.startsWith('custom') && bird ? (
-              <Group clip={birdClipPath}>
-                {/* Circular clipped custom bird with pixel art style and background removal */}
-                <Image
-                  image={bird}
-                  y={birdY}
-                  x={birdX}
-                  width={48}
-                  height={48}
-                  fit="cover"
-                >
-                  <ColorMatrix
-                    matrix={[
-                      1.2, 0, 0, 0, 0,     // Red: boost contrast
-                      0, 1.2, 0, 0, 0,     // Green: boost contrast
-                      0, 0, 1.2, 0, 0,     // Blue: boost contrast
-                      0, 0, 0, 1.5, -0.3,  // Alpha: increase transparency on lighter pixels
-                    ]}
-                  />
-                </Image>
-              </Group>
-            ) : (
-              <Image image={bird} y={birdY} x={birdX} width={64} height={48} />
-            )}
-          </Group>
+          {bird && (
+            <Group transform={birdTransform} origin={birdOrigin}>
+              {(birdColor.startsWith('custom') || birdColor === 'manas') ? (
+                <Group clip={birdClipPath}>
+                  {/* Circular clipped custom bird with pixel art style and background removal */}
+                  <Image
+                    image={bird}
+                    y={birdY}
+                    x={birdX}
+                    width={48}
+                    height={48}
+                    fit="cover"
+                  >
+                    <ColorMatrix
+                      matrix={[
+                        1.2, 0, 0, 0, 0,     // Red: boost contrast
+                        0, 1.2, 0, 0, 0,     // Green: boost contrast
+                        0, 0, 1.2, 0, 0,     // Blue: boost contrast
+                        0, 0, 0, 1.5, -0.3,  // Alpha: increase transparency on lighter pixels
+                      ]}
+                    />
+                  </Image>
+                </Group>
+              ) : (
+                <Image image={bird} y={birdY} x={birdX} width={64} height={48} />
+              )}
+            </Group>
+          )}
 
           {/* Score - only show when playing */}
           {gameState === 'playing' && (
@@ -1154,6 +1172,49 @@ const App = () => {
                   {birdColor === 'red' && (
                     <Circle
                       cx={255}
+                      cy={436}
+                      r={40}
+                      style="stroke"
+                      strokeWidth={3}
+                      color="#FFD700"
+                    />
+                  )}
+                </>
+              )}
+            </Group>
+
+            {/* Manas Bird */}
+            <Group>
+              {manasBird && (
+                <>
+                  {birdColor === 'manas' && (
+                    <Group opacity={0.3}>
+                      <Group clip={rrect(rect(310, 401, 70, 70), 35, 35)}>
+                        <Image
+                          image={manasBird}
+                          x={310}
+                          y={401}
+                          width={70}
+                          height={70}
+                          fit="cover"
+                        />
+                      </Group>
+                    </Group>
+                  )}
+                  <Group clip={rrect(rect(310, 401, 70, 70), 35, 35)}>
+                    <Image
+                      image={manasBird}
+                      x={310}
+                      y={401}
+                      width={70}
+                      height={70}
+                      fit="cover"
+                      opacity={birdColor === 'manas' ? 1 : 0.6}
+                    />
+                  </Group>
+                  {birdColor === 'manas' && (
+                    <Circle
+                      cx={345}
                       cy={436}
                       r={40}
                       style="stroke"
