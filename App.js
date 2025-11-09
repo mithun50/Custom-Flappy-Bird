@@ -1407,8 +1407,8 @@ const App = () => {
             return;
           }
 
-          // Back button - SCALED
-          if (tapX >= width / 2 - 140 * scaleWidth && tapX <= width / 2 + 140 * scaleWidth && tapY >= height - 120 * scaleHeight && tapY <= height - 40 * scaleHeight) {
+          // Back button - SCALED (top-left corner)
+          if (tapX >= 10 * scaleWidth && tapX <= 90 * scaleWidth && tapY >= 10 * scaleHeight && tapY <= 90 * scaleHeight) {
             runOnJS(setCurrentPage)('game');
             runOnJS(playJumpSound)();
             return;
@@ -1738,13 +1738,13 @@ const App = () => {
             </Group>
           </Group>
 
-          {/* Back Button - SCALED */}
+          {/* Back Button - SCALED (top-left corner) */}
           {backBtn && (
             <Image
               image={backBtn}
-              x={width / 2 - 140 * scaleWidth}
-              y={height - 120 * scaleHeight}
-              width={280 * scaleWidth}
+              x={10 * scaleWidth}
+              y={10 * scaleHeight}
+              width={80 * scaleWidth}
               height={80 * scaleHeight}
               fit="contain"
             />
