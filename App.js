@@ -607,28 +607,28 @@ const App = () => {
     const birdWidth = 70 * scaleWidth;
 
     // Yellow bird
-    if (tapX >= 30 * scaleWidth && tapX <= 30 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+    if (tapX >= 15 * scaleWidth && tapX <= 15 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
       runOnJS(setBirdColor)('yellow');
       runOnJS(playJumpSound)();
       return;
     }
 
     // Blue bird
-    if (tapX >= 120 * scaleWidth && tapX <= 120 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+    if (tapX >= 100 * scaleWidth && tapX <= 100 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
       runOnJS(setBirdColor)('blue');
       runOnJS(playJumpSound)();
       return;
     }
 
     // Red bird
-    if (tapX >= 210 * scaleWidth && tapX <= 210 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+    if (tapX >= 185 * scaleWidth && tapX <= 185 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
       runOnJS(setBirdColor)('red');
       runOnJS(playJumpSound)();
       return;
     }
 
     // Manas bird
-    if (tapX >= 300 * scaleWidth && tapX <= 300 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+    if (tapX >= 270 * scaleWidth && tapX <= 270 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
       runOnJS(setBirdColor)('manas');
       runOnJS(playJumpSound)();
       return;
@@ -1095,7 +1095,7 @@ const App = () => {
                     <Group opacity={0.3}>
                       <Image
                         image={yellowBird}
-                        x={30 * scaleWidth}
+                        x={15 * scaleWidth}
                         y={410 * scaleHeight}
                         width={70 * scaleWidth}
                         height={52 * scaleHeight}
@@ -1104,7 +1104,7 @@ const App = () => {
                   )}
                   <Image
                     image={yellowBird}
-                    x={30 * scaleWidth}
+                    x={15 * scaleWidth}
                     y={410 * scaleHeight}
                     width={70 * scaleWidth}
                     height={52 * scaleHeight}
@@ -1112,7 +1112,7 @@ const App = () => {
                   />
                   {birdColor === 'yellow' && (
                     <Circle
-                      cx={65 * scaleWidth}
+                      cx={50 * scaleWidth}
                       cy={436 * scaleHeight}
                       r={40 * scale}
                       style="stroke"
@@ -1132,7 +1132,7 @@ const App = () => {
                     <Group opacity={0.3}>
                       <Image
                         image={blueBird}
-                        x={120 * scaleWidth}
+                        x={100 * scaleWidth}
                         y={410 * scaleHeight}
                         width={70 * scaleWidth}
                         height={52 * scaleHeight}
@@ -1141,7 +1141,7 @@ const App = () => {
                   )}
                   <Image
                     image={blueBird}
-                    x={120 * scaleWidth}
+                    x={100 * scaleWidth}
                     y={410 * scaleHeight}
                     width={70 * scaleWidth}
                     height={52 * scaleHeight}
@@ -1149,7 +1149,7 @@ const App = () => {
                   />
                   {birdColor === 'blue' && (
                     <Circle
-                      cx={155 * scaleWidth}
+                      cx={135 * scaleWidth}
                       cy={436 * scaleHeight}
                       r={40 * scale}
                       style="stroke"
@@ -1169,7 +1169,7 @@ const App = () => {
                     <Group opacity={0.3}>
                       <Image
                         image={redBird}
-                        x={210 * scaleWidth}
+                        x={185 * scaleWidth}
                         y={410 * scaleHeight}
                         width={70 * scaleWidth}
                         height={52 * scaleHeight}
@@ -1178,7 +1178,7 @@ const App = () => {
                   )}
                   <Image
                     image={redBird}
-                    x={210 * scaleWidth}
+                    x={185 * scaleWidth}
                     y={410 * scaleHeight}
                     width={70 * scaleWidth}
                     height={52 * scaleHeight}
@@ -1186,7 +1186,7 @@ const App = () => {
                   />
                   {birdColor === 'red' && (
                     <Circle
-                      cx={245 * scaleWidth}
+                      cx={220 * scaleWidth}
                       cy={436 * scaleHeight}
                       r={40 * scale}
                       style="stroke"
@@ -1204,10 +1204,10 @@ const App = () => {
                 <>
                   {birdColor === 'manas' && (
                     <Group opacity={0.3}>
-                      <Group clip={rrect(rect(300 * scaleWidth, 401 * scaleHeight, 70 * scaleWidth, 70 * scaleHeight), 35 * scale, 35 * scale)}>
+                      <Group clip={rrect(rect(270 * scaleWidth, 401 * scaleHeight, 70 * scaleWidth, 70 * scaleHeight), 35 * scale, 35 * scale)}>
                         <Image
                           image={manasBird}
-                          x={300 * scaleWidth}
+                          x={270 * scaleWidth}
                           y={401 * scaleHeight}
                           width={70 * scaleWidth}
                           height={70 * scaleHeight}
@@ -1216,10 +1216,10 @@ const App = () => {
                       </Group>
                     </Group>
                   )}
-                  <Group clip={rrect(rect(300 * scaleWidth, 401 * scaleHeight, 70 * scaleWidth, 70 * scaleHeight), 35 * scale, 35 * scale)}>
+                  <Group clip={rrect(rect(270 * scaleWidth, 401 * scaleHeight, 70 * scaleWidth, 70 * scaleHeight), 35 * scale, 35 * scale)}>
                     <Image
                       image={manasBird}
-                      x={300 * scaleWidth}
+                      x={270 * scaleWidth}
                       y={401 * scaleHeight}
                       width={70 * scaleWidth}
                       height={70 * scaleHeight}
@@ -1229,7 +1229,7 @@ const App = () => {
                   </Group>
                   {birdColor === 'manas' && (
                     <Circle
-                      cx={335 * scaleWidth}
+                      cx={305 * scaleWidth}
                       cy={436 * scaleHeight}
                       r={40 * scale}
                       style="stroke"
