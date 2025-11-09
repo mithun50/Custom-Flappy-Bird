@@ -395,7 +395,7 @@ const App = () => {
       const tapY = event.y;
 
       // Check if tapping on Customize button
-      if (tapX >= width / 2 - 80 && tapX <= width / 2 + 80 && tapY >= height - 100 && tapY <= height - 50) {
+      if (tapX >= width / 2 - 120 && tapX <= width / 2 + 120 && tapY >= height - 120 && tapY <= height - 40) {
         runOnJS(setCurrentPage)('customize');
         runOnJS(playJumpSound)();
         return;
@@ -479,13 +479,13 @@ const App = () => {
     }
 
     // Save button
-    if (tapX >= width / 2 - 100 && tapX <= width / 2 + 100 && tapY >= height - 200 && tapY <= height - 140) {
+    if (tapX >= width / 2 - 140 && tapX <= width / 2 + 140 && tapY >= height - 220 && tapY <= height - 140) {
       runOnJS(savePreferences)();
       return;
     }
 
     // Back button
-    if (tapX >= width / 2 - 100 && tapX <= width / 2 + 100 && tapY >= height - 120 && tapY <= height - 60) {
+    if (tapX >= width / 2 - 140 && tapX <= width / 2 + 140 && tapY >= height - 120 && tapY <= height - 40) {
       runOnJS(setCurrentPage)('game');
       runOnJS(playJumpSound)();
       return;
@@ -626,10 +626,10 @@ const App = () => {
               {customizeBtn && (
                 <Image
                   image={customizeBtn}
-                  x={width / 2 - 80}
-                  y={height - 100}
-                  width={160}
-                  height={50}
+                  x={width / 2 - 120}
+                  y={height - 120}
+                  width={240}
+                  height={80}
                   fit="contain"
                 />
               )}
@@ -1005,10 +1005,10 @@ const App = () => {
           {saveBtn && (
             <Image
               image={saveBtn}
-              x={width / 2 - 100}
-              y={height - 200}
-              width={200}
-              height={60}
+              x={width / 2 - 140}
+              y={height - 220}
+              width={280}
+              height={80}
               fit="contain"
             />
           )}
@@ -1017,10 +1017,10 @@ const App = () => {
           {backBtn && (
             <Image
               image={backBtn}
-              x={width / 2 - 100}
+              x={width / 2 - 140}
               y={height - 120}
-              width={200}
-              height={60}
+              width={280}
+              height={80}
               fit="contain"
             />
           )}
