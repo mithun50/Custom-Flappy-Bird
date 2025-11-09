@@ -46,6 +46,12 @@ const pipeHeight = 640;
 
 const App = () => {
   const { width, height } = useWindowDimensions();
+
+  // Responsive scaling based on screen size (reference: 360x800)
+  const scaleWidth = width / 360;
+  const scaleHeight = height / 800;
+  const scale = Math.min(scaleWidth, scaleHeight); // Use minimum to maintain aspect ratio
+
   const [score, setScore] = useState(0);
   const [gameState, setGameState] = useState('waiting'); // 'waiting', 'playing', 'gameOver'
   const [birdColor, setBirdColor] = useState('manas'); // 'yellow', 'blue', 'red', 'manas', 'custom0', 'custom1', etc.
@@ -137,9 +143,9 @@ const App = () => {
   const birdX = width / 4;
   const birdYVelocity = useSharedValue(0);
 
-  const pipeOffset = useSharedValue(0);
-  const topPipeY = useDerivedValue(() => pipeOffset.value - 320);
-  const bottomPipeY = useDerivedValue(() => height - 320 + pipeOffset.value);
+  const pipeOffset = useSharedValue(Math.random() * 400 * scaleHeight - 200 * scaleHeight); // Random initial gap position (scaled)
+  const topPipeY = useDerivedValue(() => pipeOffset.value - 320 * scaleHeight);
+  const bottomPipeY = useDerivedValue(() => height - 320 * scaleHeight + pipeOffset.value);
 
   const pipesSpeed = useDerivedValue(() => {
     return interpolate(score, [0, 20], [1, 2]);
@@ -438,7 +444,7 @@ const App = () => {
 
       // change offset for the position of the next gap
       if (previousValue && currentValue < -100 && previousValue > -100) {
-        pipeOffset.value = Math.random() * 400 - 200;
+        pipeOffset.value = Math.random() * 400 * scaleHeight - 200 * scaleHeight;
         cancelAnimation(pipeX);
         runOnJS(moveTheMap)();
       }
@@ -475,8 +481,8 @@ const App = () => {
         y: birdY.value + 24,
       };
 
-      // Ground collision detection
-      if (currentValue > height - 100 || currentValue < 0) {
+      // Ground collision detection (scaled)
+      if (currentValue > height - 100 * scaleHeight || currentValue < 0) {
         gameOver.value = true;
       }
 
@@ -514,6 +520,7 @@ const App = () => {
     birdYVelocity.value = 0;
     gameOver.value = false;
     pipeX.value = width;
+    pipeOffset.value = Math.random() * 400 * scaleHeight - 200 * scaleHeight; // Random gap position on restart (scaled)
     runOnJS(setScore)(0);
     runOnJS(setGameState)('waiting');
   };
@@ -523,12 +530,12 @@ const App = () => {
       const tapX = event.x;
       const tapY = event.y;
 
-      // Check if tapping on Customize button (checks both possible positions)
-      const btnY1 = height / 2 + 50;  // Position when hasCustomization is true
-      const btnY2 = height / 2 + 100; // Position when hasCustomization is false
-      const btnHeight = 107;
+      // Check if tapping on Customize button (checks both possible positions) - SCALED
+      const btnY1 = height / 2 + 50 * scaleHeight;  // Position when hasCustomization is true
+      const btnY2 = height / 2 + 100 * scaleHeight; // Position when hasCustomization is false
+      const btnHeight = 107 * scaleHeight;
 
-      if (tapX >= width / 2 - 160 && tapX <= width / 2 + 160 &&
+      if (tapX >= width / 2 - 160 * scaleWidth && tapX <= width / 2 + 160 * scaleWidth &&
           ((tapY >= btnY1 && tapY <= btnY1 + btnHeight) ||
            (tapY >= btnY2 && tapY <= btnY2 + btnHeight))) {
         runOnJS(setCurrentPage)('customize');
@@ -536,12 +543,12 @@ const App = () => {
         return;
       }
 
-      // Check if tapping on Development Team button
-      const devBtnY1 = height / 2 + 165;  // Position when hasCustomization is true
-      const devBtnY2 = height / 2 + 215;  // Position when hasCustomization is false
-      const devBtnHeight = 87;
+      // Check if tapping on Development Team button - SCALED
+      const devBtnY1 = height / 2 + 165 * scaleHeight;  // Position when hasCustomization is true
+      const devBtnY2 = height / 2 + 215 * scaleHeight;  // Position when hasCustomization is false
+      const devBtnHeight = 87 * scaleHeight;
 
-      if (tapX >= width / 2 - 130 && tapX <= width / 2 + 130 &&
+      if (tapX >= width / 2 - 130 * scaleWidth && tapX <= width / 2 + 130 * scaleWidth &&
           ((tapY >= devBtnY1 && tapY <= devBtnY1 + devBtnHeight) ||
            (tapY >= devBtnY2 && tapY <= devBtnY2 + devBtnHeight))) {
         runOnJS(setCurrentPage)('devteam');
@@ -569,12 +576,12 @@ const App = () => {
     const tapX = event.x;
     const tapY = event.y;
 
-    // Theme buttons
-    const themeY = 250;
-    const themeRadius = 30;
+    // Theme buttons - SCALED
+    const themeY = 250 * scaleHeight;
+    const themeRadius = 30 * scale;
 
     // Day theme
-    if (Math.sqrt((tapX - (width / 2 - 80)) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
+    if (Math.sqrt((tapX - (width / 2 - 80 * scaleWidth)) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
       runOnJS(setTheme)('day');
       runOnJS(playJumpSound)();
       return;
@@ -588,50 +595,50 @@ const App = () => {
     }
 
     // City theme
-    if (Math.sqrt((tapX - (width / 2 + 80)) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
+    if (Math.sqrt((tapX - (width / 2 + 80 * scaleWidth)) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
       runOnJS(setTheme)('city');
       runOnJS(playJumpSound)();
       return;
     }
 
-    // Bird buttons
-    const birdY = 410;
-    const birdHeight = 52;
-    const birdWidth = 70;
+    // Bird buttons - SCALED
+    const birdY = 410 * scaleHeight;
+    const birdHeight = 52 * scaleHeight;
+    const birdWidth = 70 * scaleWidth;
 
     // Yellow bird
-    if (tapX >= 40 && tapX <= 40 + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+    if (tapX >= 40 * scaleWidth && tapX <= 40 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
       runOnJS(setBirdColor)('yellow');
       runOnJS(playJumpSound)();
       return;
     }
 
     // Blue bird
-    if (tapX >= 130 && tapX <= 130 + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+    if (tapX >= 130 * scaleWidth && tapX <= 130 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
       runOnJS(setBirdColor)('blue');
       runOnJS(playJumpSound)();
       return;
     }
 
     // Red bird
-    if (tapX >= 220 && tapX <= 220 + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+    if (tapX >= 220 * scaleWidth && tapX <= 220 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
       runOnJS(setBirdColor)('red');
       runOnJS(playJumpSound)();
       return;
     }
 
     // Manas bird
-    if (tapX >= 310 && tapX <= 310 + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+    if (tapX >= 310 * scaleWidth && tapX <= 310 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
       runOnJS(setBirdColor)('manas');
       runOnJS(playJumpSound)();
       return;
     }
 
-    // Custom bird buttons - aligned with default birds positions
-    const customPositions = [75, 165, 255, 345]; // Match Yellow, Blue, Red positions + 1 more
-    const customBirdStartY = 536;
-    const customBirdRadius = 40;
-    const customBirdRowSpacing = 100;
+    // Custom bird buttons - aligned with default birds positions - SCALED
+    const customPositions = [75 * scaleWidth, 165 * scaleWidth, 255 * scaleWidth, 345 * scaleWidth]; // Match Yellow, Blue, Red positions + 1 more
+    const customBirdStartY = 536 * scaleHeight;
+    const customBirdRadius = 40 * scale;
+    const customBirdRowSpacing = 100 * scaleHeight;
     const birdsPerRow = 4;
 
     // Check each existing custom bird
@@ -641,10 +648,10 @@ const App = () => {
       const birdX = customPositions[col];
       const birdY = customBirdStartY + row * customBirdRowSpacing;
 
-      // Check delete button (top-right corner)
-      const deleteX = birdX + 25;
-      const deleteY = birdY - 25;
-      const deleteRadius = 15;
+      // Check delete button (top-right corner) - SCALED
+      const deleteX = birdX + 25 * scaleWidth;
+      const deleteY = birdY - 25 * scaleHeight;
+      const deleteRadius = 15 * scale;
 
       if (Math.sqrt((tapX - deleteX) ** 2 + (tapY - deleteY) ** 2) <= deleteRadius) {
         runOnJS(deleteCustomBird)(i);
@@ -659,26 +666,26 @@ const App = () => {
       }
     }
 
-    // Check the "+" add button (always after the last custom bird)
+    // Check the "+" add button (always after the last custom bird) - SCALED
     const nextIndex = customImages.length;
     const nextCol = nextIndex % birdsPerRow;
     const nextRow = Math.floor(nextIndex / birdsPerRow);
     const nextX = customPositions[nextCol];
     const nextY = customBirdStartY + nextRow * customBirdRowSpacing;
 
-    if (Math.sqrt((tapX - nextX) ** 2 + (tapY - nextY) ** 2) <= 35) {
+    if (Math.sqrt((tapX - nextX) ** 2 + (tapY - nextY) ** 2) <= 35 * scale) {
       runOnJS(pickImage)();
       return;
     }
 
-    // Save button
-    if (tapX >= width / 2 - 140 && tapX <= width / 2 + 140 && tapY >= height - 220 && tapY <= height - 140) {
+    // Save button - SCALED
+    if (tapX >= width / 2 - 140 * scaleWidth && tapX <= width / 2 + 140 * scaleWidth && tapY >= height - 220 * scaleHeight && tapY <= height - 140 * scaleHeight) {
       runOnJS(savePreferences)();
       return;
     }
 
-    // Back button
-    if (tapX >= width / 2 - 140 && tapX <= width / 2 + 140 && tapY >= height - 120 && tapY <= height - 40) {
+    // Back button - SCALED
+    if (tapX >= width / 2 - 140 * scaleWidth && tapX <= width / 2 + 140 * scaleWidth && tapY >= height - 120 * scaleHeight && tapY <= height - 40 * scaleHeight) {
       runOnJS(setCurrentPage)('game');
       runOnJS(playJumpSound)();
       return;
@@ -774,8 +781,8 @@ const App = () => {
           <Image
             image={base}
             width={width}
-            height={150}
-            y={height - 75}
+            height={150 * scaleHeight}
+            y={height - 75 * scaleHeight}
             x={0}
             fit={'cover'}
           />
@@ -820,81 +827,81 @@ const App = () => {
             />
           )}
 
-          {/* Tap to Play Message */}
+          {/* Tap to Play Message - SCALED */}
           {gameState === 'waiting' && messageImg && (
             <>
               <Image
                 image={messageImg}
-                x={width / 2 - 92}
-                y={height / 2 - 150}
-                width={184}
-                height={267}
+                x={width / 2 - 92 * scaleWidth}
+                y={height / 2 - 150 * scaleHeight}
+                width={184 * scaleWidth}
+                height={267 * scaleHeight}
               />
 
-              {/* Customize Button - moves based on whether customization is saved */}
+              {/* Customize Button - moves based on whether customization is saved - SCALED */}
               {customizeBtn && (
                 <Image
                   image={customizeBtn}
-                  x={width / 2 - 145}
-                  y={hasCustomization ? height / 2 + 50 : height / 2 + 100}
-                  width={320}
-                  height={107}
+                  x={width / 2 - 145 * scaleWidth}
+                  y={hasCustomization ? height / 2 + 50 * scaleHeight : height / 2 + 100 * scaleHeight}
+                  width={320 * scaleWidth}
+                  height={107 * scaleHeight}
                   fit="contain"
                 />
               )}
 
-              {/* Development Team Button */}
+              {/* Development Team Button - SCALED */}
               {devTeamBtn && (
                 <Image
                   image={devTeamBtn}
-                  x={width / 2 - 130}
-                  y={hasCustomization ? height / 2 + 165 : height / 2 + 215}
-                  width={260}
-                  height={87}
+                  x={width / 2 - 130 * scaleWidth}
+                  y={hasCustomization ? height / 2 + 165 * scaleHeight : height / 2 + 215 * scaleHeight}
+                  width={260 * scaleWidth}
+                  height={87 * scaleHeight}
                   fit="contain"
                 />
               )}
             </>
           )}
 
-          {/* Game Over Screen */}
+          {/* Game Over Screen - SCALED */}
           {gameState === 'gameOver' && (
             <>
-              {/* Game Over Image */}
+              {/* Game Over Image - SCALED */}
               {gameOverImg && (
                 <Image
                   image={gameOverImg}
-                  x={width / 2 - 96}
-                  y={150}
-                  width={192}
-                  height={42}
+                  x={width / 2 - 96 * scaleWidth}
+                  y={150 * scaleHeight}
+                  width={192 * scaleWidth}
+                  height={42 * scaleHeight}
                 />
               )}
 
-              {/* Final Score with shadow effect - more right */}
+              {/* Final Score with shadow effect - SCALED */}
               <Text
-                x={122}
-                y={250}
+                x={122 * scaleWidth}
+                y={250 * scaleHeight}
                 text={`Score: ${score}`}
                 font={font}
                 color="#000000"
               />
               <Text
-                x={120}
-                y={248}
+                x={120 * scaleWidth}
+                y={248 * scaleHeight}
                 text={`Score: ${score}`}
                 font={font}
                 color="#FFD700"
               />
 
-              {/* Restart Game Button */}
+              {/* Restart Game Button - SCALED */}
               {restartGameBtn && (
                 <Image
                   image={restartGameBtn}
-                  x={width / 2 - 140}
-                  y={300}
-                  width={280}
-                  height={80}
+                  x={width / 2 - 140 * scaleWidth}
+                  y={300 * scaleHeight}
+                  width={280 * scaleWidth}
+                  height={80 * scaleHeight}
                   fit="contain"
                 />
               )}
@@ -908,50 +915,50 @@ const App = () => {
           {/* Customization Page Background */}
           <Image image={bg} width={width} height={height} fit={'cover'} />
 
-          {/* Page Title */}
+          {/* Page Title - SCALED */}
           <Group>
             {customizePt && (
               <Image
                 image={customizePt}
-                x={width / 2 - 280}
-                y={10}
-                width={560}
-                height={160}
+                x={width / 2 - 280 * scaleWidth}
+                y={10 * scaleHeight}
+                width={560 * scaleWidth}
+                height={160 * scaleHeight}
                 fit="contain"
               />
             )}
           </Group>
 
-          {/* Theme Section */}
+          {/* Theme Section - SCALED */}
           <Group>
             {selectThemePt && (
               <Image
                 image={selectThemePt}
-                x={-10}
-                y={160}
-                width={280}
-                height={70}
+                x={-10 * scaleWidth}
+                y={160 * scaleHeight}
+                width={280 * scaleWidth}
+                height={70 * scaleHeight}
                 fit="contain"
               />
             )}
 
-            {/* Day Theme */}
+            {/* Day Theme - SCALED */}
             <Group>
               <Circle
-                cx={width / 2 - 80}
-                cy={250}
-                r={30}
+                cx={width / 2 - 80 * scaleWidth}
+                cy={250 * scaleHeight}
+                r={30 * scale}
                 color="#87CEEB"
                 opacity={theme === 'day' ? 1 : 0.4}
               />
               {bgDay && (
-                <Group clip={rrect(rect(width / 2 - 110, 220, 60, 60), 30, 30)}>
+                <Group clip={rrect(rect(width / 2 - 110 * scaleWidth, 220 * scaleHeight, 60 * scale, 60 * scale), 30 * scale, 30 * scale)}>
                   <Image
                     image={bgDay}
-                    x={width / 2 - 110}
-                    y={220}
-                    width={60}
-                    height={60}
+                    x={width / 2 - 110 * scaleWidth}
+                    y={220 * scaleHeight}
+                    width={60 * scale}
+                    height={60 * scale}
                     fit="cover"
                     opacity={theme === 'day' ? 1 : 0.4}
                   />
@@ -959,40 +966,40 @@ const App = () => {
               )}
               {theme === 'day' && (
                 <Circle
-                  cx={width / 2 - 80}
-                  cy={250}
-                  r={33}
+                  cx={width / 2 - 80 * scaleWidth}
+                  cy={250 * scaleHeight}
+                  r={33 * scale}
                   style="stroke"
-                  strokeWidth={3}
+                  strokeWidth={3 * scale}
                   color="#FFD700"
                 />
               )}
               <Text
-                x={width / 2 - 95}
-                y={290}
+                x={width / 2 - 95 * scaleWidth}
+                y={290 * scaleHeight}
                 text="Day"
                 font={smallFont}
                 color="#FFFFFF"
               />
             </Group>
 
-            {/* Night Theme */}
+            {/* Night Theme - SCALED */}
             <Group>
               <Circle
                 cx={width / 2}
-                cy={250}
-                r={30}
+                cy={250 * scaleHeight}
+                r={30 * scale}
                 color="#1a1a2e"
                 opacity={theme === 'night' ? 1 : 0.4}
               />
               {bgNight && (
-                <Group clip={rrect(rect(width / 2 - 30, 220, 60, 60), 30, 30)}>
+                <Group clip={rrect(rect(width / 2 - 30 * scale, 220 * scaleHeight, 60 * scale, 60 * scale), 30 * scale, 30 * scale)}>
                   <Image
                     image={bgNight}
-                    x={width / 2 - 30}
-                    y={220}
-                    width={60}
-                    height={60}
+                    x={width / 2 - 30 * scale}
+                    y={220 * scaleHeight}
+                    width={60 * scale}
+                    height={60 * scale}
                     fit="cover"
                     opacity={theme === 'night' ? 1 : 0.4}
                   />
@@ -1001,39 +1008,39 @@ const App = () => {
               {theme === 'night' && (
                 <Circle
                   cx={width / 2}
-                  cy={250}
-                  r={33}
+                  cy={250 * scaleHeight}
+                  r={33 * scale}
                   style="stroke"
-                  strokeWidth={3}
+                  strokeWidth={3 * scale}
                   color="#FFD700"
                 />
               )}
               <Text
-                x={width / 2 - 20}
-                y={290}
+                x={width / 2 - 20 * scaleWidth}
+                y={290 * scaleHeight}
                 text="Night"
                 font={smallFont}
                 color="#FFFFFF"
               />
             </Group>
 
-            {/* City Theme */}
+            {/* City Theme - SCALED */}
             <Group>
               <Circle
-                cx={width / 2 + 80}
-                cy={250}
-                r={30}
+                cx={width / 2 + 80 * scaleWidth}
+                cy={250 * scaleHeight}
+                r={30 * scale}
                 color="#FF6B6B"
                 opacity={theme === 'city' ? 1 : 0.4}
               />
               {bgCity && (
-                <Group clip={rrect(rect(width / 2 + 50, 220, 60, 60), 30, 30)}>
+                <Group clip={rrect(rect(width / 2 + 50 * scaleWidth, 220 * scaleHeight, 60 * scale, 60 * scale), 30 * scale, 30 * scale)}>
                   <Image
                     image={bgCity}
-                    x={width / 2 + 50}
-                    y={220}
-                    width={60}
-                    height={60}
+                    x={width / 2 + 50 * scaleWidth}
+                    y={220 * scaleHeight}
+                    width={60 * scale}
+                    height={60 * scale}
                     fit="cover"
                     opacity={theme === 'city' ? 1 : 0.4}
                   />
@@ -1041,17 +1048,17 @@ const App = () => {
               )}
               {theme === 'city' && (
                 <Circle
-                  cx={width / 2 + 80}
-                  cy={250}
-                  r={33}
+                  cx={width / 2 + 80 * scaleWidth}
+                  cy={250 * scaleHeight}
+                  r={33 * scale}
                   style="stroke"
-                  strokeWidth={3}
+                  strokeWidth={3 * scale}
                   color="#FFD700"
                 />
               )}
               <Text
-                x={width / 2 + 65}
-                y={290}
+                x={width / 2 + 65 * scaleWidth}
+                y={290 * scaleHeight}
                 text="City"
                 font={smallFont}
                 color="#FFFFFF"
@@ -1059,20 +1066,20 @@ const App = () => {
             </Group>
           </Group>
 
-          {/* Bird Section */}
+          {/* Bird Section - SCALED */}
           <Group>
             {selectCharectorPt && (
               <Image
                 image={selectCharectorPt}
-                x={-10}
-                y={340}
-                width={280}
-                height={70}
+                x={-10 * scaleWidth}
+                y={340 * scaleHeight}
+                width={280 * scaleWidth}
+                height={70 * scaleHeight}
                 fit="contain"
               />
             )}
 
-            {/* Yellow Bird */}
+            {/* Yellow Bird - SCALED */}
             <Group>
               {yellowBird && (
                 <>
@@ -1080,28 +1087,28 @@ const App = () => {
                     <Group opacity={0.3}>
                       <Image
                         image={yellowBird}
-                        x={40}
-                        y={410}
-                        width={70}
-                        height={52}
+                        x={40 * scaleWidth}
+                        y={410 * scaleHeight}
+                        width={70 * scaleWidth}
+                        height={52 * scaleHeight}
                       />
                     </Group>
                   )}
                   <Image
                     image={yellowBird}
-                    x={40}
-                    y={410}
-                    width={70}
-                    height={52}
+                    x={40 * scaleWidth}
+                    y={410 * scaleHeight}
+                    width={70 * scaleWidth}
+                    height={52 * scaleHeight}
                     opacity={birdColor === 'yellow' ? 1 : 0.6}
                   />
                   {birdColor === 'yellow' && (
                     <Circle
-                      cx={75}
-                      cy={436}
-                      r={40}
+                      cx={75 * scaleWidth}
+                      cy={436 * scaleHeight}
+                      r={40 * scale}
                       style="stroke"
-                      strokeWidth={3}
+                      strokeWidth={3 * scale}
                       color="#FFD700"
                     />
                   )}
@@ -1109,7 +1116,7 @@ const App = () => {
               )}
             </Group>
 
-            {/* Blue Bird */}
+            {/* Blue Bird - SCALED */}
             <Group>
               {blueBird && (
                 <>
@@ -1117,28 +1124,28 @@ const App = () => {
                     <Group opacity={0.3}>
                       <Image
                         image={blueBird}
-                        x={130}
-                        y={410}
-                        width={70}
-                        height={52}
+                        x={130 * scaleWidth}
+                        y={410 * scaleHeight}
+                        width={70 * scaleWidth}
+                        height={52 * scaleHeight}
                       />
                     </Group>
                   )}
                   <Image
                     image={blueBird}
-                    x={130}
-                    y={410}
-                    width={70}
-                    height={52}
+                    x={130 * scaleWidth}
+                    y={410 * scaleHeight}
+                    width={70 * scaleWidth}
+                    height={52 * scaleHeight}
                     opacity={birdColor === 'blue' ? 1 : 0.6}
                   />
                   {birdColor === 'blue' && (
                     <Circle
-                      cx={165}
-                      cy={436}
-                      r={40}
+                      cx={165 * scaleWidth}
+                      cy={436 * scaleHeight}
+                      r={40 * scale}
                       style="stroke"
-                      strokeWidth={3}
+                      strokeWidth={3 * scale}
                       color="#FFD700"
                     />
                   )}
@@ -1146,7 +1153,7 @@ const App = () => {
               )}
             </Group>
 
-            {/* Red Bird */}
+            {/* Red Bird - SCALED */}
             <Group>
               {redBird && (
                 <>
@@ -1154,28 +1161,28 @@ const App = () => {
                     <Group opacity={0.3}>
                       <Image
                         image={redBird}
-                        x={220}
-                        y={410}
-                        width={70}
-                        height={52}
+                        x={220 * scaleWidth}
+                        y={410 * scaleHeight}
+                        width={70 * scaleWidth}
+                        height={52 * scaleHeight}
                       />
                     </Group>
                   )}
                   <Image
                     image={redBird}
-                    x={220}
-                    y={410}
-                    width={70}
-                    height={52}
+                    x={220 * scaleWidth}
+                    y={410 * scaleHeight}
+                    width={70 * scaleWidth}
+                    height={52 * scaleHeight}
                     opacity={birdColor === 'red' ? 1 : 0.6}
                   />
                   {birdColor === 'red' && (
                     <Circle
-                      cx={255}
-                      cy={436}
-                      r={40}
+                      cx={255 * scaleWidth}
+                      cy={436 * scaleHeight}
+                      r={40 * scale}
                       style="stroke"
-                      strokeWidth={3}
+                      strokeWidth={3 * scale}
                       color="#FFD700"
                     />
                   )}
@@ -1183,42 +1190,42 @@ const App = () => {
               )}
             </Group>
 
-            {/* Manas Bird */}
+            {/* Manas Bird - SCALED */}
             <Group>
               {manasBird && (
                 <>
                   {birdColor === 'manas' && (
                     <Group opacity={0.3}>
-                      <Group clip={rrect(rect(310, 401, 70, 70), 35, 35)}>
+                      <Group clip={rrect(rect(310 * scaleWidth, 401 * scaleHeight, 70 * scaleWidth, 70 * scaleHeight), 35 * scale, 35 * scale)}>
                         <Image
                           image={manasBird}
-                          x={310}
-                          y={401}
-                          width={70}
-                          height={70}
+                          x={310 * scaleWidth}
+                          y={401 * scaleHeight}
+                          width={70 * scaleWidth}
+                          height={70 * scaleHeight}
                           fit="cover"
                         />
                       </Group>
                     </Group>
                   )}
-                  <Group clip={rrect(rect(310, 401, 70, 70), 35, 35)}>
+                  <Group clip={rrect(rect(310 * scaleWidth, 401 * scaleHeight, 70 * scaleWidth, 70 * scaleHeight), 35 * scale, 35 * scale)}>
                     <Image
                       image={manasBird}
-                      x={310}
-                      y={401}
-                      width={70}
-                      height={70}
+                      x={310 * scaleWidth}
+                      y={401 * scaleHeight}
+                      width={70 * scaleWidth}
+                      height={70 * scaleHeight}
                       fit="cover"
                       opacity={birdColor === 'manas' ? 1 : 0.6}
                     />
                   </Group>
                   {birdColor === 'manas' && (
                     <Circle
-                      cx={345}
-                      cy={436}
-                      r={40}
+                      cx={345 * scaleWidth}
+                      cy={436 * scaleHeight}
+                      r={40 * scale}
                       style="stroke"
-                      strokeWidth={3}
+                      strokeWidth={3 * scale}
                       color="#FFD700"
                     />
                   )}
@@ -1226,14 +1233,14 @@ const App = () => {
               )}
             </Group>
 
-            {/* Dynamic Custom Birds - below default birds, aligned with their positions */}
+            {/* Dynamic Custom Birds - below default birds, aligned with their positions - SCALED */}
             {customBirdImages.map((customBirdImg, index) => {
               // Position to match default birds: Yellow(75), Blue(165), Red(255), Custom starts at same X
-              const positions = [75, 165, 255, 345]; // 4 positions matching default bird spacing
+              const positions = [75 * scaleWidth, 165 * scaleWidth, 255 * scaleWidth, 345 * scaleWidth]; // 4 positions matching default bird spacing
               const col = index % 4;
               const row = Math.floor(index / 4);
               const x = positions[col];
-              const y = 536 + row * 100;
+              const y = 536 * scaleHeight + row * 100 * scaleHeight;
               const isSelected = birdColor === `custom${index}`;
 
               return (
@@ -1242,17 +1249,17 @@ const App = () => {
                     <Circle
                       cx={x}
                       cy={y}
-                      r={35}
+                      r={35 * scale}
                       color="rgba(255, 255, 255, 0.3)"
                     />
                   )}
-                  <Group clip={rrect(rect(x - 35, y - 35, 70, 70), 35, 35)}>
+                  <Group clip={rrect(rect(x - 35 * scale, y - 35 * scale, 70 * scale, 70 * scale), 35 * scale, 35 * scale)}>
                     <Image
                       image={customBirdImg}
-                      x={x - 35}
-                      y={y - 35}
-                      width={70}
-                      height={70}
+                      x={x - 35 * scale}
+                      y={y - 35 * scale}
+                      width={70 * scale}
+                      height={70 * scale}
                       fit="cover"
                       opacity={isSelected ? 1 : 0.6}
                     >
@@ -1270,21 +1277,21 @@ const App = () => {
                     <Circle
                       cx={x}
                       cy={y}
-                      r={37}
+                      r={37 * scale}
                       style="stroke"
-                      strokeWidth={3}
+                      strokeWidth={3 * scale}
                       color="#FFD700"
                     />
                   )}
 
-                  {/* Delete button - top right corner */}
+                  {/* Delete button - top right corner - SCALED */}
                   {deleteIcon && (
                     <Image
                       image={deleteIcon}
-                      x={x + 10}
-                      y={y - 40}
-                      width={30}
-                      height={30}
+                      x={x + 10 * scaleWidth}
+                      y={y - 40 * scaleHeight}
+                      width={30 * scaleWidth}
+                      height={30 * scaleHeight}
                       fit="contain"
                     />
                   )}
@@ -1292,39 +1299,39 @@ const App = () => {
               );
             })}
 
-            {/* Add new custom bird button */}
+            {/* Add new custom bird button - SCALED */}
             <Group>
               {(() => {
-                const positions = [75, 165, 255, 345];
+                const positions = [75 * scaleWidth, 165 * scaleWidth, 255 * scaleWidth, 345 * scaleWidth];
                 const nextIndex = customImages.length;
                 const col = nextIndex % 4;
                 const row = Math.floor(nextIndex / 4);
                 const x = positions[col];
-                const y = 536 + row * 100;
+                const y = 536 * scaleHeight + row * 100 * scaleHeight;
 
                 return (
                   <>
                     <Circle
                       cx={x}
                       cy={y}
-                      r={35}
+                      r={35 * scale}
                       color="rgba(255, 255, 255, 0.1)"
                     />
                     <Circle
                       cx={x}
                       cy={y}
-                      r={35}
+                      r={35 * scale}
                       style="stroke"
-                      strokeWidth={2}
+                      strokeWidth={2 * scale}
                       color="rgba(255, 255, 255, 0.5)"
                     />
                     {addIcon && (
                       <Image
                         image={addIcon}
-                        x={x - 30}
-                        y={y - 30}
-                        width={60}
-                        height={60}
+                        x={x - 30 * scale}
+                        y={y - 30 * scale}
+                        width={60 * scale}
+                        height={60 * scale}
                         fit="contain"
                       />
                     )}
@@ -1334,26 +1341,26 @@ const App = () => {
             </Group>
           </Group>
 
-          {/* Save Button */}
+          {/* Save Button - SCALED */}
           {saveBtn && (
             <Image
               image={saveBtn}
-              x={width / 2 - 140}
-              y={height - 220}
-              width={280}
-              height={80}
+              x={width / 2 - 140 * scaleWidth}
+              y={height - 220 * scaleHeight}
+              width={280 * scaleWidth}
+              height={80 * scaleHeight}
               fit="contain"
             />
           )}
 
-          {/* Back Button */}
+          {/* Back Button - SCALED */}
           {backBtn && (
             <Image
               image={backBtn}
-              x={width / 2 - 140}
-              y={height - 120}
-              width={280}
-              height={80}
+              x={width / 2 - 140 * scaleWidth}
+              y={height - 120 * scaleHeight}
+              width={280 * scaleWidth}
+              height={80 * scaleHeight}
               fit="contain"
             />
           )}
@@ -1365,43 +1372,43 @@ const App = () => {
           const tapX = event.x;
           const tapY = event.y;
 
-          // Harsha card (Gold)
-          if (tapX >= 5 && tapX <= 355 && tapY >= 120 && tapY <= 235) {
+          // Harsha card (Gold) - SCALED
+          if (tapX >= 5 * scaleWidth && tapX <= 355 * scaleWidth && tapY >= 120 * scaleHeight && tapY <= 235 * scaleHeight) {
             runOnJS(openInstagram)('harsha1218_');
             runOnJS(playJumpSound)();
             return;
           }
 
-          // Manas card (Blue)
-          if (tapX >= 5 && tapX <= 355 && tapY >= 245 && tapY <= 360) {
+          // Manas card (Blue) - SCALED
+          if (tapX >= 5 * scaleWidth && tapX <= 355 * scaleWidth && tapY >= 245 * scaleHeight && tapY <= 360 * scaleHeight) {
             runOnJS(openInstagram)('manas.habbu13');
             runOnJS(playJumpSound)();
             return;
           }
 
-          // Mithun card (Red)
-          if (tapX >= 5 && tapX <= 355 && tapY >= 370 && tapY <= 485) {
+          // Mithun card (Red) - SCALED
+          if (tapX >= 5 * scaleWidth && tapX <= 355 * scaleWidth && tapY >= 370 * scaleHeight && tapY <= 485 * scaleHeight) {
             runOnJS(openInstagram)('mithun.gowda.b');
             runOnJS(playJumpSound)();
             return;
           }
 
-          // Naren card (Green)
-          if (tapX >= 5 && tapX <= 355 && tapY >= 495 && tapY <= 610) {
+          // Naren card (Green) - SCALED
+          if (tapX >= 5 * scaleWidth && tapX <= 355 * scaleWidth && tapY >= 495 * scaleHeight && tapY <= 610 * scaleHeight) {
             runOnJS(openInstagram)('naren_vk_29');
             runOnJS(playJumpSound)();
             return;
           }
 
-          // Nevil card (Purple)
-          if (tapX >= 5 && tapX <= 355 && tapY >= 620 && tapY <= 735) {
+          // Nevil card (Purple) - SCALED
+          if (tapX >= 5 * scaleWidth && tapX <= 355 * scaleWidth && tapY >= 620 * scaleHeight && tapY <= 735 * scaleHeight) {
             runOnJS(openInstagram)('_nevil_06');
             runOnJS(playJumpSound)();
             return;
           }
 
-          // Back button
-          if (tapX >= width / 2 - 140 && tapX <= width / 2 + 140 && tapY >= height - 120 && tapY <= height - 40) {
+          // Back button - SCALED
+          if (tapX >= width / 2 - 140 * scaleWidth && tapX <= width / 2 + 140 * scaleWidth && tapY >= height - 120 * scaleHeight && tapY <= height - 40 * scaleHeight) {
             runOnJS(setCurrentPage)('game');
             runOnJS(playJumpSound)();
             return;
@@ -1411,14 +1418,14 @@ const App = () => {
           {/* Development Team Page Background */}
           <Image image={bg} width={width} height={height} fit={'cover'} />
 
-          {/* Page Title */}
+          {/* Page Title - SCALED */}
           {devTeamPt && (
             <Image
               image={devTeamPt}
-              x={width / 2 - 250}
-              y={10}
-              width={500}
-              height={100}
+              x={width / 2 - 250 * scaleWidth}
+              y={10 * scaleHeight}
+              width={500 * scaleWidth}
+              height={100 * scaleHeight}
               fit="contain"
             />
           )}
@@ -1428,317 +1435,317 @@ const App = () => {
             {/* Harsha Card - Red Premium */}
             <Group>
               {/* Outer glow mega effect */}
-              <Group clip={rrect(rect(3, 123, 354, 115), 28, 28)} opacity={0.4}>
-                <Circle cx={180} cy={180} r={130} color="#E74C3C" />
+              <Group clip={rrect(rect(3 * scaleWidth, 123 * scaleHeight, 354 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)} opacity={0.4}>
+                <Circle cx={180 * scaleWidth} cy={180 * scaleHeight} r={130 * scale} color="#E74C3C" />
               </Group>
               {/* Card deep shadow */}
-              <Group clip={rrect(rect(6, 125, 354, 115), 28, 28)}>
-                <Circle cx={183} cy={182} r={140} color="rgba(0, 0, 0, 0.35)" />
+              <Group clip={rrect(rect(6 * scaleWidth, 125 * scaleHeight, 354 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)}>
+                <Circle cx={183 * scaleWidth} cy={182 * scaleHeight} r={140 * scale} color="rgba(0, 0, 0, 0.35)" />
               </Group>
               {/* Card base - gradient dark */}
-              <Group clip={rrect(rect(5, 120, 350, 115), 28, 28)}>
-                <Circle cx={180} cy={177} r={140} color="#0a0a0a" />
-                <Circle cx={100} cy={140} r={100} color="#1a1a1a" opacity={0.8} />
-                <Circle cx={280} cy={200} r={90} color="#1a1a1a" opacity={0.6} />
+              <Group clip={rrect(rect(5 * scaleWidth, 120 * scaleHeight, 350 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)}>
+                <Circle cx={180 * scaleWidth} cy={177 * scaleHeight} r={140 * scale} color="#0a0a0a" />
+                <Circle cx={100 * scaleWidth} cy={140 * scaleHeight} r={100 * scale} color="#1a1a1a" opacity={0.8} />
+                <Circle cx={280 * scaleWidth} cy={200 * scaleHeight} r={90 * scale} color="#1a1a1a" opacity={0.6} />
               </Group>
               {/* Left gradient overlay */}
-              <Group clip={rrect(rect(5, 120, 120, 115), 28, 0)} opacity={0.5}>
-                <Circle cx={65} cy={177} r={90} color="#E74C3C50" />
+              <Group clip={rrect(rect(5 * scaleWidth, 120 * scaleHeight, 120 * scaleWidth, 115 * scaleHeight), 28 * scale, 0)} opacity={0.5}>
+                <Circle cx={65 * scaleWidth} cy={177 * scaleHeight} r={90 * scale} color="#E74C3C50" />
               </Group>
               {/* Right subtle gradient */}
-              <Group clip={rrect(rect(240, 120, 115, 115), 0, 28)} opacity={0.15}>
-                <Circle cx={298} cy={177} r={80} color="#E74C3C30" />
+              <Group clip={rrect(rect(240 * scaleWidth, 120 * scaleHeight, 115 * scaleWidth, 115 * scaleHeight), 0, 28 * scale)} opacity={0.15}>
+                <Circle cx={298 * scaleWidth} cy={177 * scaleHeight} r={80 * scale} color="#E74C3C30" />
               </Group>
               {/* Top premium accent bar */}
-              <Group clip={rrect(rect(5, 120, 350, 5), 28, 0)}>
-                <Circle cx={180} cy={122} r={175} color="#E74C3C" />
-                <Circle cx={250} cy={122} r={100} color="#C0392B" opacity={0.6} />
+              <Group clip={rrect(rect(5 * scaleWidth, 120 * scaleHeight, 350 * scaleWidth, 5 * scaleHeight), 28 * scale, 0)}>
+                <Circle cx={180 * scaleWidth} cy={122 * scaleHeight} r={175 * scale} color="#E74C3C" />
+                <Circle cx={250 * scaleWidth} cy={122 * scaleHeight} r={100 * scale} color="#C0392B" opacity={0.6} />
               </Group>
               {/* Avatar section - large premium */}
               {/* Outer glow rings */}
-              <Circle cx={70} cy={177} r={52} color="#E74C3C40" />
-              <Circle cx={70} cy={177} r={50} color="#E74C3C60" />
+              <Circle cx={70 * scaleWidth} cy={177 * scaleHeight} r={52 * scale} color="#E74C3C40" />
+              <Circle cx={70 * scaleWidth} cy={177 * scaleHeight} r={50 * scale} color="#E74C3C60" />
               {/* Avatar base rings */}
-              <Circle cx={70} cy={177} r={48} color="#0a0a0a" />
-              <Circle cx={70} cy={177} r={45} color="#E74C3C" />
-              <Circle cx={70} cy={177} r={43} color="#1a1a1a" />
-              <Circle cx={70} cy={177} r={40} color="#2a2a2a" />
+              <Circle cx={70 * scaleWidth} cy={177 * scaleHeight} r={48 * scale} color="#0a0a0a" />
+              <Circle cx={70 * scaleWidth} cy={177 * scaleHeight} r={45 * scale} color="#E74C3C" />
+              <Circle cx={70 * scaleWidth} cy={177 * scaleHeight} r={43 * scale} color="#1a1a1a" />
+              <Circle cx={70 * scaleWidth} cy={177 * scaleHeight} r={40 * scale} color="#2a2a2a" />
               {/* Inner gradient for depth */}
-              <Circle cx={70} cy={177} r={38} color="#E74C3C20" />
+              <Circle cx={70 * scaleWidth} cy={177 * scaleHeight} r={38 * scale} color="#E74C3C20" />
               {/* Avatar image */}
               {harshaPt && (
-                <Group clip={rrect(rect(30, 137, 80, 80), 40, 40)}>
-                  <Image image={harshaPt} x={30} y={137} width={80} height={80} fit="cover" />
+                <Group clip={rrect(rect(30 * scaleWidth, 137 * scaleHeight, 80 * scaleWidth, 80 * scaleHeight), 40 * scale, 40 * scale)}>
+                  <Image image={harshaPt} x={30 * scaleWidth} y={137 * scaleHeight} width={80 * scaleWidth} height={80 * scaleHeight} fit="cover" />
                 </Group>
               )}
               {/* Status dot with glow */}
-              <Circle cx={102} cy={155} r={9} color="#00FF0060" />
-              <Circle cx={102} cy={155} r={7} color="#0a0a0a" />
-              <Circle cx={102} cy={155} r={5} color="#00FF00" />
+              <Circle cx={102 * scaleWidth} cy={155 * scaleHeight} r={9 * scale} color="#00FF0060" />
+              <Circle cx={102 * scaleWidth} cy={155 * scaleHeight} r={7 * scale} color="#0a0a0a" />
+              <Circle cx={102 * scaleWidth} cy={155 * scaleHeight} r={5 * scale} color="#00FF00" />
               {/* Decorative line separator */}
-              <Group clip={rrect(rect(130, 165, 2, 30), 1, 1)}>
-                <Circle cx={131} cy={180} r={20} color="#E74C3C30" />
+              <Group clip={rrect(rect(130 * scaleWidth, 165 * scaleHeight, 2 * scaleWidth, 30 * scaleHeight), 1 * scale, 1 * scale)}>
+                <Circle cx={131 * scaleWidth} cy={180 * scaleHeight} r={20 * scale} color="#E74C3C30" />
               </Group>
               {/* Name and role section */}
-              <Text x={145} y={165} text="HARSHA N" font={boldPixelFont} color="#FFFFFF" />
-              <Text x={145} y={185} text="Developer" font={mediumFont} color="#E74C3C" />
+              <Text x={145 * scaleWidth} y={165 * scaleHeight} text="HARSHA N" font={boldPixelFont} color="#FFFFFF" />
+              <Text x={145 * scaleWidth} y={185 * scaleHeight} text="Developer" font={mediumFont} color="#E74C3C" />
               {/* Stats badges - premium style */}
-              <Group clip={rrect(rect(145, 197, 70, 28), 14, 14)}>
-                <Circle cx={180} cy={211} r={45} color="#E74C3C25" />
+              <Group clip={rrect(rect(145 * scaleWidth, 197 * scaleHeight, 70 * scaleWidth, 28 * scaleHeight), 14 * scale, 14 * scale)}>
+                <Circle cx={180 * scaleWidth} cy={211 * scaleHeight} r={45 * scale} color="#E74C3C25" />
               </Group>
-              <Text x={153} y={215} text="DESIGN" font={mediumFont} color="#E74C3C" />
-              <Group clip={rrect(rect(225, 197, 70, 28), 14, 14)}>
-                <Circle cx={260} cy={211} r={45} color="#00FF0025" />
+              <Text x={153 * scaleWidth} y={215 * scaleHeight} text="DESIGN" font={mediumFont} color="#E74C3C" />
+              <Group clip={rrect(rect(225 * scaleWidth, 197 * scaleHeight, 70 * scaleWidth, 28 * scaleHeight), 14 * scale, 14 * scale)}>
+                <Circle cx={260 * scaleWidth} cy={211 * scaleHeight} r={45 * scale} color="#00FF0025" />
               </Group>
-              <Text x={235} y={215} text="ACTIVE" font={mediumFont} color="#00FF00" />
+              <Text x={235 * scaleWidth} y={215 * scaleHeight} text="ACTIVE" font={mediumFont} color="#00FF00" />
               {/* Right corner badge */}
-              <Group clip={rrect(rect(305, 197, 38, 22), 11, 11)}>
-                <Circle cx={324} cy={208} r={25} color="#E74C3C40" />
+              <Group clip={rrect(rect(305 * scaleWidth, 197 * scaleHeight, 38 * scaleWidth, 22 * scaleHeight), 11 * scale, 11 * scale)}>
+                <Circle cx={324 * scaleWidth} cy={208 * scaleHeight} r={25 * scale} color="#E74C3C40" />
               </Group>
-              <Text x={312} y={212} text="DEV" font={mediumFont} color="#E74C3C" />
+              <Text x={312 * scaleWidth} y={212 * scaleHeight} text="DEV" font={mediumFont} color="#E74C3C" />
             </Group>
 
             {/* Manas Card - Blue Premium */}
             <Group>
-              <Group clip={rrect(rect(3, 248, 354, 115), 28, 28)} opacity={0.4}>
-                <Circle cx={180} cy={305} r={130} color="#4A90E2" />
+              <Group clip={rrect(rect(3 * scaleWidth, 248 * scaleHeight, 354 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)} opacity={0.4}>
+                <Circle cx={180 * scaleWidth} cy={305 * scaleHeight} r={130 * scale} color="#4A90E2" />
               </Group>
-              <Group clip={rrect(rect(6, 250, 354, 115), 28, 28)}>
-                <Circle cx={183} cy={307} r={140} color="rgba(0, 0, 0, 0.35)" />
+              <Group clip={rrect(rect(6 * scaleWidth, 250 * scaleHeight, 354 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)}>
+                <Circle cx={183 * scaleWidth} cy={307 * scaleHeight} r={140 * scale} color="rgba(0, 0, 0, 0.35)" />
               </Group>
-              <Group clip={rrect(rect(5, 245, 350, 115), 28, 28)}>
-                <Circle cx={180} cy={302} r={140} color="#0a0a0a" />
-                <Circle cx={100} cy={265} r={100} color="#1a1a1a" opacity={0.8} />
-                <Circle cx={280} cy={325} r={90} color="#1a1a1a" opacity={0.6} />
+              <Group clip={rrect(rect(5 * scaleWidth, 245 * scaleHeight, 350 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)}>
+                <Circle cx={180 * scaleWidth} cy={302 * scaleHeight} r={140 * scale} color="#0a0a0a" />
+                <Circle cx={100 * scaleWidth} cy={265 * scaleHeight} r={100 * scale} color="#1a1a1a" opacity={0.8} />
+                <Circle cx={280 * scaleWidth} cy={325 * scaleHeight} r={90 * scale} color="#1a1a1a" opacity={0.6} />
               </Group>
-              <Group clip={rrect(rect(5, 245, 120, 115), 28, 0)} opacity={0.5}>
-                <Circle cx={65} cy={302} r={90} color="#4A90E250" />
+              <Group clip={rrect(rect(5 * scaleWidth, 245 * scaleHeight, 120 * scaleWidth, 115 * scaleHeight), 28 * scale, 0)} opacity={0.5}>
+                <Circle cx={65 * scaleWidth} cy={302 * scaleHeight} r={90 * scale} color="#4A90E250" />
               </Group>
-              <Group clip={rrect(rect(240, 245, 115, 115), 0, 28)} opacity={0.15}>
-                <Circle cx={298} cy={302} r={80} color="#4A90E230" />
+              <Group clip={rrect(rect(240 * scaleWidth, 245 * scaleHeight, 115 * scaleWidth, 115 * scaleHeight), 0, 28 * scale)} opacity={0.15}>
+                <Circle cx={298 * scaleWidth} cy={302 * scaleHeight} r={80 * scale} color="#4A90E230" />
               </Group>
-              <Group clip={rrect(rect(5, 245, 350, 5), 28, 0)}>
-                <Circle cx={180} cy={247} r={175} color="#4A90E2" />
-                <Circle cx={250} cy={247} r={100} color="#357ABD" opacity={0.6} />
+              <Group clip={rrect(rect(5 * scaleWidth, 245 * scaleHeight, 350 * scaleWidth, 5 * scaleHeight), 28 * scale, 0)}>
+                <Circle cx={180 * scaleWidth} cy={247 * scaleHeight} r={175 * scale} color="#4A90E2" />
+                <Circle cx={250 * scaleWidth} cy={247 * scaleHeight} r={100 * scale} color="#357ABD" opacity={0.6} />
               </Group>
-              <Circle cx={70} cy={302} r={52} color="#4A90E240" />
-              <Circle cx={70} cy={302} r={50} color="#4A90E260" />
-              <Circle cx={70} cy={302} r={48} color="#0a0a0a" />
-              <Circle cx={70} cy={302} r={45} color="#4A90E2" />
-              <Circle cx={70} cy={302} r={43} color="#1a1a1a" />
-              <Circle cx={70} cy={302} r={40} color="#2a2a2a" />
-              <Circle cx={70} cy={302} r={38} color="#4A90E220" />
+              <Circle cx={70 * scaleWidth} cy={302 * scaleHeight} r={52 * scale} color="#4A90E240" />
+              <Circle cx={70 * scaleWidth} cy={302 * scaleHeight} r={50 * scale} color="#4A90E260" />
+              <Circle cx={70 * scaleWidth} cy={302 * scaleHeight} r={48 * scale} color="#0a0a0a" />
+              <Circle cx={70 * scaleWidth} cy={302 * scaleHeight} r={45 * scale} color="#4A90E2" />
+              <Circle cx={70 * scaleWidth} cy={302 * scaleHeight} r={43 * scale} color="#1a1a1a" />
+              <Circle cx={70 * scaleWidth} cy={302 * scaleHeight} r={40 * scale} color="#2a2a2a" />
+              <Circle cx={70 * scaleWidth} cy={302 * scaleHeight} r={38 * scale} color="#4A90E220" />
               {/* Avatar image */}
               {manasPt && (
-                <Group clip={rrect(rect(30, 262, 80, 80), 40, 40)}>
-                  <Image image={manasPt} x={30} y={262} width={80} height={80} fit="cover" />
+                <Group clip={rrect(rect(30 * scaleWidth, 262 * scaleHeight, 80 * scaleWidth, 80 * scaleHeight), 40 * scale, 40 * scale)}>
+                  <Image image={manasPt} x={30 * scaleWidth} y={262 * scaleHeight} width={80 * scaleWidth} height={80 * scaleHeight} fit="cover" />
                 </Group>
               )}
-              <Circle cx={102} cy={280} r={9} color="#00FF0060" />
-              <Circle cx={102} cy={280} r={7} color="#0a0a0a" />
-              <Circle cx={102} cy={280} r={5} color="#00FF00" />
-              <Group clip={rrect(rect(130, 290, 2, 30), 1, 1)}>
-                <Circle cx={131} cy={305} r={20} color="#4A90E230" />
+              <Circle cx={102 * scaleWidth} cy={280 * scaleHeight} r={9 * scale} color="#00FF0060" />
+              <Circle cx={102 * scaleWidth} cy={280 * scaleHeight} r={7 * scale} color="#0a0a0a" />
+              <Circle cx={102 * scaleWidth} cy={280 * scaleHeight} r={5 * scale} color="#00FF00" />
+              <Group clip={rrect(rect(130 * scaleWidth, 290 * scaleHeight, 2 * scaleWidth, 30 * scaleHeight), 1 * scale, 1 * scale)}>
+                <Circle cx={131 * scaleWidth} cy={305 * scaleHeight} r={20 * scale} color="#4A90E230" />
               </Group>
-              <Text x={145} y={290} text="MANAS HABBU" font={boldPixelFont} color="#FFFFFF" />
-              <Text x={145} y={310} text="Developer" font={mediumFont} color="#4A90E2" />
-              <Group clip={rrect(rect(145, 322, 70, 28), 14, 14)}>
-                <Circle cx={180} cy={336} r={45} color="#4A90E225" />
+              <Text x={145 * scaleWidth} y={290 * scaleHeight} text="MANAS HABBU" font={boldPixelFont} color="#FFFFFF" />
+              <Text x={145 * scaleWidth} y={310 * scaleHeight} text="Developer" font={mediumFont} color="#4A90E2" />
+              <Group clip={rrect(rect(145 * scaleWidth, 322 * scaleHeight, 70 * scaleWidth, 28 * scaleHeight), 14 * scale, 14 * scale)}>
+                <Circle cx={180 * scaleWidth} cy={336 * scaleHeight} r={45 * scale} color="#4A90E225" />
               </Group>
-              <Text x={153} y={340} text="DESIGN" font={mediumFont} color="#4A90E2" />
-              <Group clip={rrect(rect(225, 322, 70, 28), 14, 14)}>
-                <Circle cx={260} cy={336} r={45} color="#00FF0025" />
+              <Text x={153 * scaleWidth} y={340 * scaleHeight} text="DESIGN" font={mediumFont} color="#4A90E2" />
+              <Group clip={rrect(rect(225 * scaleWidth, 322 * scaleHeight, 70 * scaleWidth, 28 * scaleHeight), 14 * scale, 14 * scale)}>
+                <Circle cx={260 * scaleWidth} cy={336 * scaleHeight} r={45 * scale} color="#00FF0025" />
               </Group>
-              <Text x={235} y={340} text="ACTIVE" font={mediumFont} color="#00FF00" />
-              <Group clip={rrect(rect(305, 322, 38, 22), 11, 11)}>
-                <Circle cx={324} cy={333} r={25} color="#4A90E240" />
+              <Text x={235 * scaleWidth} y={340 * scaleHeight} text="ACTIVE" font={mediumFont} color="#00FF00" />
+              <Group clip={rrect(rect(305 * scaleWidth, 322 * scaleHeight, 38 * scaleWidth, 22 * scaleHeight), 11 * scale, 11 * scale)}>
+                <Circle cx={324 * scaleWidth} cy={333 * scaleHeight} r={25 * scale} color="#4A90E240" />
               </Group>
-              <Text x={312} y={337} text="DEV" font={mediumFont} color="#4A90E2" />
+              <Text x={312 * scaleWidth} y={337 * scaleHeight} text="DEV" font={mediumFont} color="#4A90E2" />
             </Group>
 
             {/* Mithun Card - Gold Premium */}
             <Group>
-              <Group clip={rrect(rect(3, 373, 354, 115), 28, 28)} opacity={0.4}>
-                <Circle cx={180} cy={430} r={130} color="#FFD700" />
+              <Group clip={rrect(rect(3 * scaleWidth, 373 * scaleHeight, 354 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)} opacity={0.4}>
+                <Circle cx={180 * scaleWidth} cy={430 * scaleHeight} r={130 * scale} color="#FFD700" />
               </Group>
-              <Group clip={rrect(rect(6, 375, 354, 115), 28, 28)}>
-                <Circle cx={183} cy={432} r={140} color="rgba(0, 0, 0, 0.35)" />
+              <Group clip={rrect(rect(6 * scaleWidth, 375 * scaleHeight, 354 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)}>
+                <Circle cx={183 * scaleWidth} cy={432 * scaleHeight} r={140 * scale} color="rgba(0, 0, 0, 0.35)" />
               </Group>
-              <Group clip={rrect(rect(5, 370, 350, 115), 28, 28)}>
-                <Circle cx={180} cy={427} r={140} color="#0a0a0a" />
-                <Circle cx={100} cy={390} r={100} color="#1a1a1a" opacity={0.8} />
-                <Circle cx={280} cy={450} r={90} color="#1a1a1a" opacity={0.6} />
+              <Group clip={rrect(rect(5 * scaleWidth, 370 * scaleHeight, 350 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)}>
+                <Circle cx={180 * scaleWidth} cy={427 * scaleHeight} r={140 * scale} color="#0a0a0a" />
+                <Circle cx={100 * scaleWidth} cy={390 * scaleHeight} r={100 * scale} color="#1a1a1a" opacity={0.8} />
+                <Circle cx={280 * scaleWidth} cy={450 * scaleHeight} r={90 * scale} color="#1a1a1a" opacity={0.6} />
               </Group>
-              <Group clip={rrect(rect(5, 370, 120, 115), 28, 0)} opacity={0.5}>
-                <Circle cx={65} cy={427} r={90} color="#FFD70050" />
+              <Group clip={rrect(rect(5 * scaleWidth, 370 * scaleHeight, 120 * scaleWidth, 115 * scaleHeight), 28 * scale, 0)} opacity={0.5}>
+                <Circle cx={65 * scaleWidth} cy={427 * scaleHeight} r={90 * scale} color="#FFD70050" />
               </Group>
-              <Group clip={rrect(rect(240, 370, 115, 115), 0, 28)} opacity={0.15}>
-                <Circle cx={298} cy={427} r={80} color="#FFD70030" />
+              <Group clip={rrect(rect(240 * scaleWidth, 370 * scaleHeight, 115 * scaleWidth, 115 * scaleHeight), 0, 28 * scale)} opacity={0.15}>
+                <Circle cx={298 * scaleWidth} cy={427 * scaleHeight} r={80 * scale} color="#FFD70030" />
               </Group>
-              <Group clip={rrect(rect(5, 370, 350, 5), 28, 0)}>
-                <Circle cx={180} cy={372} r={175} color="#FFD700" />
-                <Circle cx={250} cy={372} r={100} color="#FFA500" opacity={0.6} />
+              <Group clip={rrect(rect(5 * scaleWidth, 370 * scaleHeight, 350 * scaleWidth, 5 * scaleHeight), 28 * scale, 0)}>
+                <Circle cx={180 * scaleWidth} cy={372 * scaleHeight} r={175 * scale} color="#FFD700" />
+                <Circle cx={250 * scaleWidth} cy={372 * scaleHeight} r={100 * scale} color="#FFA500" opacity={0.6} />
               </Group>
-              <Circle cx={70} cy={427} r={52} color="#FFD70040" />
-              <Circle cx={70} cy={427} r={50} color="#FFD70060" />
-              <Circle cx={70} cy={427} r={48} color="#0a0a0a" />
-              <Circle cx={70} cy={427} r={45} color="#FFD700" />
-              <Circle cx={70} cy={427} r={43} color="#1a1a1a" />
-              <Circle cx={70} cy={427} r={40} color="#2a2a2a" />
-              <Circle cx={70} cy={427} r={38} color="#FFD70020" />
+              <Circle cx={70 * scaleWidth} cy={427 * scaleHeight} r={52 * scale} color="#FFD70040" />
+              <Circle cx={70 * scaleWidth} cy={427 * scaleHeight} r={50 * scale} color="#FFD70060" />
+              <Circle cx={70 * scaleWidth} cy={427 * scaleHeight} r={48 * scale} color="#0a0a0a" />
+              <Circle cx={70 * scaleWidth} cy={427 * scaleHeight} r={45 * scale} color="#FFD700" />
+              <Circle cx={70 * scaleWidth} cy={427 * scaleHeight} r={43 * scale} color="#1a1a1a" />
+              <Circle cx={70 * scaleWidth} cy={427 * scaleHeight} r={40 * scale} color="#2a2a2a" />
+              <Circle cx={70 * scaleWidth} cy={427 * scaleHeight} r={38 * scale} color="#FFD70020" />
               {/* Avatar image */}
               {mithunPt && (
-                <Group clip={rrect(rect(30, 387, 80, 80), 40, 40)}>
-                  <Image image={mithunPt} x={30} y={387} width={80} height={80} fit="cover" />
+                <Group clip={rrect(rect(30 * scaleWidth, 387 * scaleHeight, 80 * scaleWidth, 80 * scaleHeight), 40 * scale, 40 * scale)}>
+                  <Image image={mithunPt} x={30 * scaleWidth} y={387 * scaleHeight} width={80 * scaleWidth} height={80 * scaleHeight} fit="cover" />
                 </Group>
               )}
-              <Circle cx={102} cy={405} r={9} color="#00FF0060" />
-              <Circle cx={102} cy={405} r={7} color="#0a0a0a" />
-              <Circle cx={102} cy={405} r={5} color="#00FF00" />
-              <Group clip={rrect(rect(130, 415, 2, 30), 1, 1)}>
-                <Circle cx={131} cy={430} r={20} color="#FFD70030" />
+              <Circle cx={102 * scaleWidth} cy={405 * scaleHeight} r={9 * scale} color="#00FF0060" />
+              <Circle cx={102 * scaleWidth} cy={405 * scaleHeight} r={7 * scale} color="#0a0a0a" />
+              <Circle cx={102 * scaleWidth} cy={405 * scaleHeight} r={5 * scale} color="#00FF00" />
+              <Group clip={rrect(rect(130 * scaleWidth, 415 * scaleHeight, 2 * scaleWidth, 30 * scaleHeight), 1 * scale, 1 * scale)}>
+                <Circle cx={131 * scaleWidth} cy={430 * scaleHeight} r={20 * scale} color="#FFD70030" />
               </Group>
-              <Text x={145} y={415} text="MITHUN GOWDA B" font={boldPixelFont} color="#FFFFFF" />
-              <Text x={145} y={435} text="Team Lead" font={mediumFont} color="#FFD700" />
-              <Group clip={rrect(rect(145, 447, 70, 28), 14, 14)}>
-                <Circle cx={180} cy={461} r={45} color="#FFD70025" />
+              <Text x={145 * scaleWidth} y={415 * scaleHeight} text="MITHUN GOWDA B" font={boldPixelFont} color="#FFFFFF" />
+              <Text x={145 * scaleWidth} y={435 * scaleHeight} text="Team Lead" font={mediumFont} color="#FFD700" />
+              <Group clip={rrect(rect(145 * scaleWidth, 447 * scaleHeight, 70 * scaleWidth, 28 * scaleHeight), 14 * scale, 14 * scale)}>
+                <Circle cx={180 * scaleWidth} cy={461 * scaleHeight} r={45 * scale} color="#FFD70025" />
               </Group>
-              <Text x={157} y={465} text="LOGIC" font={mediumFont} color="#FFD700" />
-              <Group clip={rrect(rect(225, 447, 70, 28), 14, 14)}>
-                <Circle cx={260} cy={461} r={45} color="#00FF0025" />
+              <Text x={157 * scaleWidth} y={465 * scaleHeight} text="LOGIC" font={mediumFont} color="#FFD700" />
+              <Group clip={rrect(rect(225 * scaleWidth, 447 * scaleHeight, 70 * scaleWidth, 28 * scaleHeight), 14 * scale, 14 * scale)}>
+                <Circle cx={260 * scaleWidth} cy={461 * scaleHeight} r={45 * scale} color="#00FF0025" />
               </Group>
-              <Text x={235} y={465} text="ACTIVE" font={mediumFont} color="#00FF00" />
-              <Group clip={rrect(rect(305, 447, 38, 22), 11, 11)}>
-                <Circle cx={324} cy={458} r={25} color="#FFD70040" />
+              <Text x={235 * scaleWidth} y={465 * scaleHeight} text="ACTIVE" font={mediumFont} color="#00FF00" />
+              <Group clip={rrect(rect(305 * scaleWidth, 447 * scaleHeight, 38 * scaleWidth, 22 * scaleHeight), 11 * scale, 11 * scale)}>
+                <Circle cx={324 * scaleWidth} cy={458 * scaleHeight} r={25 * scale} color="#FFD70040" />
               </Group>
-              <Text x={312} y={462} text="PRO" font={mediumFont} color="#FFD700" />
+              <Text x={312 * scaleWidth} y={462 * scaleHeight} text="PRO" font={mediumFont} color="#FFD700" />
             </Group>
 
             {/* Naren Card - Green Premium */}
             <Group>
-              <Group clip={rrect(rect(3, 498, 354, 115), 28, 28)} opacity={0.4}>
-                <Circle cx={180} cy={555} r={130} color="#27AE60" />
+              <Group clip={rrect(rect(3 * scaleWidth, 498 * scaleHeight, 354 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)} opacity={0.4}>
+                <Circle cx={180 * scaleWidth} cy={555 * scaleHeight} r={130 * scale} color="#27AE60" />
               </Group>
-              <Group clip={rrect(rect(6, 500, 354, 115), 28, 28)}>
-                <Circle cx={183} cy={557} r={140} color="rgba(0, 0, 0, 0.35)" />
+              <Group clip={rrect(rect(6 * scaleWidth, 500 * scaleHeight, 354 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)}>
+                <Circle cx={183 * scaleWidth} cy={557 * scaleHeight} r={140 * scale} color="rgba(0, 0, 0, 0.35)" />
               </Group>
-              <Group clip={rrect(rect(5, 495, 350, 115), 28, 28)}>
-                <Circle cx={180} cy={552} r={140} color="#0a0a0a" />
-                <Circle cx={100} cy={515} r={100} color="#1a1a1a" opacity={0.8} />
-                <Circle cx={280} cy={575} r={90} color="#1a1a1a" opacity={0.6} />
+              <Group clip={rrect(rect(5 * scaleWidth, 495 * scaleHeight, 350 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)}>
+                <Circle cx={180 * scaleWidth} cy={552 * scaleHeight} r={140 * scale} color="#0a0a0a" />
+                <Circle cx={100 * scaleWidth} cy={515 * scaleHeight} r={100 * scale} color="#1a1a1a" opacity={0.8} />
+                <Circle cx={280 * scaleWidth} cy={575 * scaleHeight} r={90 * scale} color="#1a1a1a" opacity={0.6} />
               </Group>
-              <Group clip={rrect(rect(5, 495, 120, 115), 28, 0)} opacity={0.5}>
-                <Circle cx={65} cy={552} r={90} color="#27AE6050" />
+              <Group clip={rrect(rect(5 * scaleWidth, 495 * scaleHeight, 120 * scaleWidth, 115 * scaleHeight), 28 * scale, 0)} opacity={0.5}>
+                <Circle cx={65 * scaleWidth} cy={552 * scaleHeight} r={90 * scale} color="#27AE6050" />
               </Group>
-              <Group clip={rrect(rect(240, 495, 115, 115), 0, 28)} opacity={0.15}>
-                <Circle cx={298} cy={552} r={80} color="#27AE6030" />
+              <Group clip={rrect(rect(240 * scaleWidth, 495 * scaleHeight, 115 * scaleWidth, 115 * scaleHeight), 0, 28 * scale)} opacity={0.15}>
+                <Circle cx={298 * scaleWidth} cy={552 * scaleHeight} r={80 * scale} color="#27AE6030" />
               </Group>
-              <Group clip={rrect(rect(5, 495, 350, 5), 28, 0)}>
-                <Circle cx={180} cy={497} r={175} color="#27AE60" />
-                <Circle cx={250} cy={497} r={100} color="#229954" opacity={0.6} />
+              <Group clip={rrect(rect(5 * scaleWidth, 495 * scaleHeight, 350 * scaleWidth, 5 * scaleHeight), 28 * scale, 0)}>
+                <Circle cx={180 * scaleWidth} cy={497 * scaleHeight} r={175 * scale} color="#27AE60" />
+                <Circle cx={250 * scaleWidth} cy={497 * scaleHeight} r={100 * scale} color="#229954" opacity={0.6} />
               </Group>
-              <Circle cx={70} cy={552} r={52} color="#27AE6040" />
-              <Circle cx={70} cy={552} r={50} color="#27AE6060" />
-              <Circle cx={70} cy={552} r={48} color="#0a0a0a" />
-              <Circle cx={70} cy={552} r={45} color="#27AE60" />
-              <Circle cx={70} cy={552} r={43} color="#1a1a1a" />
-              <Circle cx={70} cy={552} r={40} color="#2a2a2a" />
-              <Circle cx={70} cy={552} r={38} color="#27AE6020" />
+              <Circle cx={70 * scaleWidth} cy={552 * scaleHeight} r={52 * scale} color="#27AE6040" />
+              <Circle cx={70 * scaleWidth} cy={552 * scaleHeight} r={50 * scale} color="#27AE6060" />
+              <Circle cx={70 * scaleWidth} cy={552 * scaleHeight} r={48 * scale} color="#0a0a0a" />
+              <Circle cx={70 * scaleWidth} cy={552 * scaleHeight} r={45 * scale} color="#27AE60" />
+              <Circle cx={70 * scaleWidth} cy={552 * scaleHeight} r={43 * scale} color="#1a1a1a" />
+              <Circle cx={70 * scaleWidth} cy={552 * scaleHeight} r={40 * scale} color="#2a2a2a" />
+              <Circle cx={70 * scaleWidth} cy={552 * scaleHeight} r={38 * scale} color="#27AE6020" />
               {/* Avatar image */}
               {narenPt && (
-                <Group clip={rrect(rect(30, 512, 80, 80), 40, 40)}>
-                  <Image image={narenPt} x={30} y={512} width={80} height={80} fit="cover" />
+                <Group clip={rrect(rect(30 * scaleWidth, 512 * scaleHeight, 80 * scaleWidth, 80 * scaleHeight), 40 * scale, 40 * scale)}>
+                  <Image image={narenPt} x={30 * scaleWidth} y={512 * scaleHeight} width={80 * scaleWidth} height={80 * scaleHeight} fit="cover" />
                 </Group>
               )}
-              <Circle cx={102} cy={530} r={9} color="#00FF0060" />
-              <Circle cx={102} cy={530} r={7} color="#0a0a0a" />
-              <Circle cx={102} cy={530} r={5} color="#00FF00" />
-              <Group clip={rrect(rect(130, 540, 2, 30), 1, 1)}>
-                <Circle cx={131} cy={555} r={20} color="#27AE6030" />
+              <Circle cx={102 * scaleWidth} cy={530 * scaleHeight} r={9 * scale} color="#00FF0060" />
+              <Circle cx={102 * scaleWidth} cy={530 * scaleHeight} r={7 * scale} color="#0a0a0a" />
+              <Circle cx={102 * scaleWidth} cy={530 * scaleHeight} r={5 * scale} color="#00FF00" />
+              <Group clip={rrect(rect(130 * scaleWidth, 540 * scaleHeight, 2 * scaleWidth, 30 * scaleHeight), 1 * scale, 1 * scale)}>
+                <Circle cx={131 * scaleWidth} cy={555 * scaleHeight} r={20 * scale} color="#27AE6030" />
               </Group>
-              <Text x={145} y={540} text="NAREN V" font={boldPixelFont} color="#FFFFFF" />
-              <Text x={145} y={560} text="Developer" font={mediumFont} color="#27AE60" />
-              <Group clip={rrect(rect(145, 572, 70, 28), 14, 14)}>
-                <Circle cx={180} cy={586} r={45} color="#27AE6025" />
+              <Text x={145 * scaleWidth} y={540 * scaleHeight} text="NAREN V" font={boldPixelFont} color="#FFFFFF" />
+              <Text x={145 * scaleWidth} y={560 * scaleHeight} text="Developer" font={mediumFont} color="#27AE60" />
+              <Group clip={rrect(rect(145 * scaleWidth, 572 * scaleHeight, 70 * scaleWidth, 28 * scaleHeight), 14 * scale, 14 * scale)}>
+                <Circle cx={180 * scaleWidth} cy={586 * scaleHeight} r={45 * scale} color="#27AE6025" />
               </Group>
-              <Text x={157} y={590} text="LOGIC" font={mediumFont} color="#27AE60" />
-              <Group clip={rrect(rect(225, 572, 70, 28), 14, 14)}>
-                <Circle cx={260} cy={586} r={45} color="#00FF0025" />
+              <Text x={157 * scaleWidth} y={590 * scaleHeight} text="LOGIC" font={mediumFont} color="#27AE60" />
+              <Group clip={rrect(rect(225 * scaleWidth, 572 * scaleHeight, 70 * scaleWidth, 28 * scaleHeight), 14 * scale, 14 * scale)}>
+                <Circle cx={260 * scaleWidth} cy={586 * scaleHeight} r={45 * scale} color="#00FF0025" />
               </Group>
-              <Text x={235} y={590} text="ACTIVE" font={mediumFont} color="#00FF00" />
-              <Group clip={rrect(rect(305, 572, 38, 22), 11, 11)}>
-                <Circle cx={324} cy={583} r={25} color="#27AE6040" />
+              <Text x={235 * scaleWidth} y={590 * scaleHeight} text="ACTIVE" font={mediumFont} color="#00FF00" />
+              <Group clip={rrect(rect(305 * scaleWidth, 572 * scaleHeight, 38 * scaleWidth, 22 * scaleHeight), 11 * scale, 11 * scale)}>
+                <Circle cx={324 * scaleWidth} cy={583 * scaleHeight} r={25 * scale} color="#27AE6040" />
               </Group>
-              <Text x={312} y={587} text="DEV" font={mediumFont} color="#27AE60" />
+              <Text x={312 * scaleWidth} y={587 * scaleHeight} text="DEV" font={mediumFont} color="#27AE60" />
             </Group>
 
             {/* Nevil Card - Purple Premium */}
             <Group>
-              <Group clip={rrect(rect(3, 623, 354, 115), 28, 28)} opacity={0.4}>
-                <Circle cx={180} cy={680} r={130} color="#9B59B6" />
+              <Group clip={rrect(rect(3 * scaleWidth, 623 * scaleHeight, 354 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)} opacity={0.4}>
+                <Circle cx={180 * scaleWidth} cy={680 * scaleHeight} r={130 * scale} color="#9B59B6" />
               </Group>
-              <Group clip={rrect(rect(6, 625, 354, 115), 28, 28)}>
-                <Circle cx={183} cy={682} r={140} color="rgba(0, 0, 0, 0.35)" />
+              <Group clip={rrect(rect(6 * scaleWidth, 625 * scaleHeight, 354 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)}>
+                <Circle cx={183 * scaleWidth} cy={682 * scaleHeight} r={140 * scale} color="rgba(0, 0, 0, 0.35)" />
               </Group>
-              <Group clip={rrect(rect(5, 620, 350, 115), 28, 28)}>
-                <Circle cx={180} cy={677} r={140} color="#0a0a0a" />
-                <Circle cx={100} cy={640} r={100} color="#1a1a1a" opacity={0.8} />
-                <Circle cx={280} cy={700} r={90} color="#1a1a1a" opacity={0.6} />
+              <Group clip={rrect(rect(5 * scaleWidth, 620 * scaleHeight, 350 * scaleWidth, 115 * scaleHeight), 28 * scale, 28 * scale)}>
+                <Circle cx={180 * scaleWidth} cy={677 * scaleHeight} r={140 * scale} color="#0a0a0a" />
+                <Circle cx={100 * scaleWidth} cy={640 * scaleHeight} r={100 * scale} color="#1a1a1a" opacity={0.8} />
+                <Circle cx={280 * scaleWidth} cy={700 * scaleHeight} r={90 * scale} color="#1a1a1a" opacity={0.6} />
               </Group>
-              <Group clip={rrect(rect(5, 620, 120, 115), 28, 0)} opacity={0.5}>
-                <Circle cx={65} cy={677} r={90} color="#9B59B650" />
+              <Group clip={rrect(rect(5 * scaleWidth, 620 * scaleHeight, 120 * scaleWidth, 115 * scaleHeight), 28 * scale, 0)} opacity={0.5}>
+                <Circle cx={65 * scaleWidth} cy={677 * scaleHeight} r={90 * scale} color="#9B59B650" />
               </Group>
-              <Group clip={rrect(rect(240, 620, 115, 115), 0, 28)} opacity={0.15}>
-                <Circle cx={298} cy={677} r={80} color="#9B59B630" />
+              <Group clip={rrect(rect(240 * scaleWidth, 620 * scaleHeight, 115 * scaleWidth, 115 * scaleHeight), 0, 28 * scale)} opacity={0.15}>
+                <Circle cx={298 * scaleWidth} cy={677 * scaleHeight} r={80 * scale} color="#9B59B630" />
               </Group>
-              <Group clip={rrect(rect(5, 620, 350, 5), 28, 0)}>
-                <Circle cx={180} cy={622} r={175} color="#9B59B6" />
-                <Circle cx={250} cy={622} r={100} color="#8E44AD" opacity={0.6} />
+              <Group clip={rrect(rect(5 * scaleWidth, 620 * scaleHeight, 350 * scaleWidth, 5 * scaleHeight), 28 * scale, 0)}>
+                <Circle cx={180 * scaleWidth} cy={622 * scaleHeight} r={175 * scale} color="#9B59B6" />
+                <Circle cx={250 * scaleWidth} cy={622 * scaleHeight} r={100 * scale} color="#8E44AD" opacity={0.6} />
               </Group>
-              <Circle cx={70} cy={677} r={52} color="#9B59B640" />
-              <Circle cx={70} cy={677} r={50} color="#9B59B660" />
-              <Circle cx={70} cy={677} r={48} color="#0a0a0a" />
-              <Circle cx={70} cy={677} r={45} color="#9B59B6" />
-              <Circle cx={70} cy={677} r={43} color="#1a1a1a" />
-              <Circle cx={70} cy={677} r={40} color="#2a2a2a" />
-              <Circle cx={70} cy={677} r={38} color="#9B59B620" />
+              <Circle cx={70 * scaleWidth} cy={677 * scaleHeight} r={52 * scale} color="#9B59B640" />
+              <Circle cx={70 * scaleWidth} cy={677 * scaleHeight} r={50 * scale} color="#9B59B660" />
+              <Circle cx={70 * scaleWidth} cy={677 * scaleHeight} r={48 * scale} color="#0a0a0a" />
+              <Circle cx={70 * scaleWidth} cy={677 * scaleHeight} r={45 * scale} color="#9B59B6" />
+              <Circle cx={70 * scaleWidth} cy={677 * scaleHeight} r={43 * scale} color="#1a1a1a" />
+              <Circle cx={70 * scaleWidth} cy={677 * scaleHeight} r={40 * scale} color="#2a2a2a" />
+              <Circle cx={70 * scaleWidth} cy={677 * scaleHeight} r={38 * scale} color="#9B59B620" />
               {/* Avatar image */}
               {nevilPt && (
-                <Group clip={rrect(rect(30, 637, 80, 80), 40, 40)}>
-                  <Image image={nevilPt} x={30} y={637} width={80} height={80} fit="cover" />
+                <Group clip={rrect(rect(30 * scaleWidth, 637 * scaleHeight, 80 * scaleWidth, 80 * scaleHeight), 40 * scale, 40 * scale)}>
+                  <Image image={nevilPt} x={30 * scaleWidth} y={637 * scaleHeight} width={80 * scaleWidth} height={80 * scaleHeight} fit="cover" />
                 </Group>
               )}
-              <Circle cx={102} cy={655} r={9} color="#00FF0060" />
-              <Circle cx={102} cy={655} r={7} color="#0a0a0a" />
-              <Circle cx={102} cy={655} r={5} color="#00FF00" />
-              <Group clip={rrect(rect(130, 665, 2, 30), 1, 1)}>
-                <Circle cx={131} cy={680} r={20} color="#9B59B630" />
+              <Circle cx={102 * scaleWidth} cy={655 * scaleHeight} r={9 * scale} color="#00FF0060" />
+              <Circle cx={102 * scaleWidth} cy={655 * scaleHeight} r={7 * scale} color="#0a0a0a" />
+              <Circle cx={102 * scaleWidth} cy={655 * scaleHeight} r={5 * scale} color="#00FF00" />
+              <Group clip={rrect(rect(130 * scaleWidth, 665 * scaleHeight, 2 * scaleWidth, 30 * scaleHeight), 1 * scale, 1 * scale)}>
+                <Circle cx={131 * scaleWidth} cy={680 * scaleHeight} r={20 * scale} color="#9B59B630" />
               </Group>
-              <Text x={145} y={665} text="NEVIL D'SOUZA" font={boldPixelFont} color="#FFFFFF" />
-              <Text x={145} y={685} text="Developer" font={mediumFont} color="#9B59B6" />
-              <Group clip={rrect(rect(145, 697, 70, 28), 14, 14)}>
-                <Circle cx={180} cy={711} r={45} color="#9B59B625" />
+              <Text x={145 * scaleWidth} y={665 * scaleHeight} text="NEVIL D'SOUZA" font={boldPixelFont} color="#FFFFFF" />
+              <Text x={145 * scaleWidth} y={685 * scaleHeight} text="Developer" font={mediumFont} color="#9B59B6" />
+              <Group clip={rrect(rect(145 * scaleWidth, 697 * scaleHeight, 70 * scaleWidth, 28 * scaleHeight), 14 * scale, 14 * scale)}>
+                <Circle cx={180 * scaleWidth} cy={711 * scaleHeight} r={45 * scale} color="#9B59B625" />
               </Group>
-              <Text x={157} y={715} text="LOGIC" font={mediumFont} color="#9B59B6" />
-              <Group clip={rrect(rect(225, 697, 70, 28), 14, 14)}>
-                <Circle cx={260} cy={711} r={45} color="#00FF0025" />
+              <Text x={157 * scaleWidth} y={715 * scaleHeight} text="LOGIC" font={mediumFont} color="#9B59B6" />
+              <Group clip={rrect(rect(225 * scaleWidth, 697 * scaleHeight, 70 * scaleWidth, 28 * scaleHeight), 14 * scale, 14 * scale)}>
+                <Circle cx={260 * scaleWidth} cy={711 * scaleHeight} r={45 * scale} color="#00FF0025" />
               </Group>
-              <Text x={235} y={715} text="ACTIVE" font={mediumFont} color="#00FF00" />
-              <Group clip={rrect(rect(305, 697, 38, 22), 11, 11)}>
-                <Circle cx={324} cy={708} r={25} color="#9B59B640" />
+              <Text x={235 * scaleWidth} y={715 * scaleHeight} text="ACTIVE" font={mediumFont} color="#00FF00" />
+              <Group clip={rrect(rect(305 * scaleWidth, 697 * scaleHeight, 38 * scaleWidth, 22 * scaleHeight), 11 * scale, 11 * scale)}>
+                <Circle cx={324 * scaleWidth} cy={708 * scaleHeight} r={25 * scale} color="#9B59B640" />
               </Group>
-              <Text x={312} y={712} text="DEV" font={mediumFont} color="#9B59B6" />
+              <Text x={312 * scaleWidth} y={712 * scaleHeight} text="DEV" font={mediumFont} color="#9B59B6" />
             </Group>
           </Group>
 
-          {/* Back Button */}
+          {/* Back Button - SCALED */}
           {backBtn && (
             <Image
               image={backBtn}
-              x={width / 2 - 140}
-              y={height - 120}
-              width={280}
-              height={80}
+              x={width / 2 - 140 * scaleWidth}
+              y={height - 120 * scaleHeight}
+              width={280 * scaleWidth}
+              height={80 * scaleHeight}
               fit="contain"
             />
           )}
