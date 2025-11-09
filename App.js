@@ -634,12 +634,18 @@ const App = () => {
       return;
     }
 
-    // Custom bird buttons - aligned with default birds positions - SCALED
-    const customPositions = [75 * scaleWidth, 165 * scaleWidth, 255 * scaleWidth, 345 * scaleWidth]; // Match Yellow, Blue, Red positions + 1 more
+    // Custom bird buttons - 3 columns to fit all screens - SCALED
+    const birdSize = 70 * scale;
+    const spacing = (width - (3 * birdSize)) / 4;
+    const customPositions = [
+      spacing + birdSize / 2,
+      spacing + birdSize + spacing + birdSize / 2,
+      spacing + birdSize + spacing + birdSize + spacing + birdSize / 2
+    ];
     const customBirdStartY = 536 * scaleHeight;
     const customBirdRadius = 40 * scale;
     const customBirdRowSpacing = 100 * scaleHeight;
-    const birdsPerRow = 4;
+    const birdsPerRow = 3; // 3 columns instead of 4
 
     // Check each existing custom bird
     for (let i = 0; i < customImages.length; i++) {
@@ -1235,10 +1241,16 @@ const App = () => {
 
             {/* Dynamic Custom Birds - below default birds, aligned with their positions - SCALED */}
             {customBirdImages.map((customBirdImg, index) => {
-              // Position to match default birds: Yellow(75), Blue(165), Red(255), Custom starts at same X
-              const positions = [75 * scaleWidth, 165 * scaleWidth, 255 * scaleWidth, 345 * scaleWidth]; // 4 positions matching default bird spacing
-              const col = index % 4;
-              const row = Math.floor(index / 4);
+              // Position to fit within screen bounds - 3 columns to prevent overflow
+              const birdSize = 70 * scale;
+              const spacing = (width - (3 * birdSize)) / 4; // Evenly distribute spacing
+              const positions = [
+                spacing + birdSize / 2,
+                spacing + birdSize + spacing + birdSize / 2,
+                spacing + birdSize + spacing + birdSize + spacing + birdSize / 2
+              ];
+              const col = index % 3; // 3 columns instead of 4
+              const row = Math.floor(index / 3);
               const x = positions[col];
               const y = 536 * scaleHeight + row * 100 * scaleHeight;
               const isSelected = birdColor === `custom${index}`;
@@ -1407,8 +1419,8 @@ const App = () => {
             return;
           }
 
-          // Back button - SCALED (top-left corner)
-          if (tapX >= 10 * scaleWidth && tapX <= 90 * scaleWidth && tapY >= 10 * scaleHeight && tapY <= 90 * scaleHeight) {
+          // Back button - SCALED (left side, above Harsha card)
+          if (tapX >= 0 && tapX <= 180 * scaleWidth && tapY >= 35 * scaleHeight && tapY <= 155 * scaleHeight) {
             runOnJS(setCurrentPage)('game');
             runOnJS(playJumpSound)();
             return;
@@ -1738,14 +1750,14 @@ const App = () => {
             </Group>
           </Group>
 
-          {/* Back Button - SCALED (top-left corner) */}
+          {/* Back Button - SCALED (left side, above Harsha card) */}
           {backBtn && (
             <Image
               image={backBtn}
-              x={10 * scaleWidth}
-              y={10 * scaleHeight}
-              width={80 * scaleWidth}
-              height={80 * scaleHeight}
+              x={-20 * scaleWidth}
+              y={35 * scaleHeight}
+              width={200 * scaleWidth}
+              height={120 * scaleHeight}
               fit="contain"
             />
           )}
