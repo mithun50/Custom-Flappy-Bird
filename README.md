@@ -467,8 +467,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Original Game** - Flappy Bird by Dong Nguyen
-- **Graphics Assets** - Original Flappy Bird sprite assets
+- **Graphics Assets** - Classic sprite assets and visual elements
 - **React Native Community** - For amazing libraries and support
 - **Expo Team** - For the excellent development platform
 - **Shopify Skia Team** - For high-performance graphics library
