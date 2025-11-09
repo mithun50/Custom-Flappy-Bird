@@ -1,0 +1,75 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Install required NDK and CMake
+      - name: Install NDK and CMake
+        run: |
+          sdkmanager "cmake;3.22.1" "ndk;26.1.10909125"
+
+      # Add swap space to prevent memory freeze
+      - name: Increase swap space (4GB)
+        run: |
+          sudo fallocate -l 4G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+
+      - name: Cache Gradle and CMake
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.cxx
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/CMakeLists.txt') }}
+
+      - name: Install Expo CLI
+        run: npm install -g expo
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Verify environment variables
+        run: echo "✅ Environment ready"
+
+      - name: Run Expo Prebuild (Android only)
+        run: expo prebuild --platform android --clean
+
+      - name: Build Android APK
+        working-directory: android
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/26.1.10909125
+          CMAKE_VERSION: 3.22.1
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs=-Xmx2048m"
+        run: timeout 30m ./gradlew assembleRelease --no-daemon --info --stacktrace
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
