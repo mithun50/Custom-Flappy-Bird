@@ -691,14 +691,14 @@ const App = () => {
     const customBirdsBottom = customBirdStartY + (customBirdRows - 1) * customBirdRowSpacing + 70 * scaleHeight; // bottom of last row + padding
     const buttonStartY = Math.max(customBirdsBottom + 20 * scaleHeight, 530 * scaleHeight); // At least 20px below custom birds or default position
 
-    // Save button - SCALED (moves down with custom birds)
-    if (tapX >= width / 2 - 140 * scaleWidth && tapX <= width / 2 + 140 * scaleWidth && tapY >= buttonStartY && tapY <= buttonStartY + 80 * scaleHeight) {
+    // Save button - SCALED (left side, moves down with custom birds)
+    if (tapX >= 10 * scaleWidth && tapX <= 190 * scaleWidth && tapY >= buttonStartY && tapY <= buttonStartY + 80 * scaleHeight) {
       runOnJS(savePreferences)();
       return;
     }
 
-    // Back button - SCALED (moves down with custom birds)
-    if (tapX >= width / 2 - 140 * scaleWidth && tapX <= width / 2 + 140 * scaleWidth && tapY >= buttonStartY + 100 * scaleHeight && tapY <= buttonStartY + 180 * scaleHeight) {
+    // Back button - SCALED (right side, moves down with custom birds)
+    if (tapX >= 200 * scaleWidth && tapX <= 350 * scaleWidth && tapY >= buttonStartY && tapY <= buttonStartY + 80 * scaleHeight) {
       runOnJS(setCurrentPage)('game');
       runOnJS(playJumpSound)();
       return;
@@ -1370,7 +1370,7 @@ const App = () => {
             </Group>
           </Group>
 
-          {/* Save Button - SCALED (dynamic position based on custom birds) */}
+          {/* Save Button - SCALED (left side, dynamic position based on custom birds) */}
           {saveBtn && (() => {
             const customBirdRows = Math.ceil((customImages.length + 1) / 4);
             const customBirdsBottom = 530 * scaleHeight + (customBirdRows - 1) * 110 * scaleHeight + 70 * scaleHeight;
@@ -1379,16 +1379,16 @@ const App = () => {
             return (
               <Image
                 image={saveBtn}
-                x={width / 2 - 140 * scaleWidth}
+                x={10 * scaleWidth}
                 y={buttonStartY}
-                width={280 * scaleWidth}
+                width={180 * scaleWidth}
                 height={80 * scaleHeight}
                 fit="contain"
               />
             );
           })()}
 
-          {/* Back Button - SCALED (dynamic position based on custom birds) */}
+          {/* Back Button - SCALED (right side, dynamic position based on custom birds) */}
           {backBtn && (() => {
             const customBirdRows = Math.ceil((customImages.length + 1) / 4);
             const customBirdsBottom = 530 * scaleHeight + (customBirdRows - 1) * 110 * scaleHeight + 70 * scaleHeight;
@@ -1397,9 +1397,9 @@ const App = () => {
             return (
               <Image
                 image={backBtn}
-                x={width / 2 - 140 * scaleWidth}
-                y={buttonStartY + 100 * scaleHeight}
-                width={280 * scaleWidth}
+                x={200 * scaleWidth}
+                y={buttonStartY}
+                width={150 * scaleWidth}
                 height={80 * scaleHeight}
                 fit="contain"
               />
