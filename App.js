@@ -692,13 +692,13 @@ const App = () => {
     const buttonStartY = Math.max(customBirdsBottom + 20 * scaleHeight, 530 * scaleHeight); // At least 20px below custom birds or default position
 
     // Save button - SCALED (left side, moves down with custom birds)
-    if (tapX >= 10 * scaleWidth && tapX <= 190 * scaleWidth && tapY >= buttonStartY && tapY <= buttonStartY + 80 * scaleHeight) {
+    if (tapX >= 5 * scaleWidth && tapX <= 175 * scaleWidth && tapY >= buttonStartY && tapY <= buttonStartY + 100 * scaleHeight) {
       runOnJS(savePreferences)();
       return;
     }
 
     // Back button - SCALED (right side, moves down with custom birds)
-    if (tapX >= 200 * scaleWidth && tapX <= 350 * scaleWidth && tapY >= buttonStartY && tapY <= buttonStartY + 80 * scaleHeight) {
+    if (tapX >= 180 * scaleWidth && tapX <= 355 * scaleWidth && tapY >= buttonStartY && tapY <= buttonStartY + 100 * scaleHeight) {
       runOnJS(setCurrentPage)('game');
       runOnJS(playJumpSound)();
       return;
@@ -1379,10 +1379,10 @@ const App = () => {
             return (
               <Image
                 image={saveBtn}
-                x={10 * scaleWidth}
+                x={5 * scaleWidth}
                 y={buttonStartY}
-                width={180 * scaleWidth}
-                height={80 * scaleHeight}
+                width={170 * scaleWidth}
+                height={100 * scaleHeight}
                 fit="contain"
               />
             );
@@ -1397,10 +1397,10 @@ const App = () => {
             return (
               <Image
                 image={backBtn}
-                x={200 * scaleWidth}
+                x={180 * scaleWidth}
                 y={buttonStartY}
-                width={150 * scaleWidth}
-                height={80 * scaleHeight}
+                width={175 * scaleWidth}
+                height={100 * scaleHeight}
                 fit="contain"
               />
             );
