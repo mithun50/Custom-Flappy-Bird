@@ -67,6 +67,9 @@ const App = () => {
   const messageImg = useImage(require('./assets/sprites/message.png'));
   const gameOverImg = useImage(require('./assets/sprites/gameover.png'));
   const customBird = useImage(customImageUri);
+  const customizeBtn = useImage(require('./assets/sprites/customize_button.png'));
+  const saveBtn = useImage(require('./assets/sprites/save_button.png'));
+  const backBtn = useImage(require('./assets/sprites/back_button.png'));
 
   // Get current bird based on selection
   const bird = birdColor === 'custom' ? customBird :
@@ -620,21 +623,16 @@ const App = () => {
               />
 
               {/* Customize Button */}
-              <Group>
-                <Group clip={rrect(rect(width / 2 - 80, height - 100, 160, 50), 10, 10)}>
-                  <Circle cx={width / 2} cy={height - 75} r={80} color="#FFD700" />
-                </Group>
-                <Group clip={rrect(rect(width / 2 - 80, height - 100, 160, 50), 10, 10)} style="stroke">
-                  <Circle cx={width / 2} cy={height - 75} r={80} color="#FFFFFF" style="stroke" strokeWidth={3} />
-                </Group>
-                <Text
-                  x={width / 2 - 55}
-                  y={height - 72}
-                  text="Customize"
-                  font={mediumFont}
-                  color="#000000"
+              {customizeBtn && (
+                <Image
+                  image={customizeBtn}
+                  x={width / 2 - 80}
+                  y={height - 100}
+                  width={160}
+                  height={50}
+                  fit="contain"
                 />
-              </Group>
+              )}
             </>
           )}
 
@@ -1004,38 +1002,28 @@ const App = () => {
           </Group>
 
           {/* Save Button */}
-          <Group>
-            <Group clip={rrect(rect(width / 2 - 100, height - 200, 200, 60), 10, 10)}>
-              <Circle cx={width / 2} cy={height - 170} r={100} color="#4CAF50" />
-            </Group>
-            <Group clip={rrect(rect(width / 2 - 100, height - 200, 200, 60), 10, 10)} style="stroke">
-              <Circle cx={width / 2} cy={height - 170} r={100} color="#FFFFFF" style="stroke" strokeWidth={3} />
-            </Group>
-            <Text
-              x={width / 2 - 35}
-              y={height - 167}
-              text="SAVE"
-              font={mediumFont}
-              color="#FFFFFF"
+          {saveBtn && (
+            <Image
+              image={saveBtn}
+              x={width / 2 - 100}
+              y={height - 200}
+              width={200}
+              height={60}
+              fit="contain"
             />
-          </Group>
+          )}
 
           {/* Back Button */}
-          <Group>
-            <Group clip={rrect(rect(width / 2 - 100, height - 120, 200, 60), 10, 10)}>
-              <Circle cx={width / 2} cy={height - 90} r={100} color="#FF5722" />
-            </Group>
-            <Group clip={rrect(rect(width / 2 - 100, height - 120, 200, 60), 10, 10)} style="stroke">
-              <Circle cx={width / 2} cy={height - 90} r={100} color="#FFFFFF" style="stroke" strokeWidth={3} />
-            </Group>
-            <Text
-              x={width / 2 - 40}
-              y={height - 87}
-              text="BACK"
-              font={mediumFont}
-              color="#FFFFFF"
+          {backBtn && (
+            <Image
+              image={backBtn}
+              x={width / 2 - 100}
+              y={height - 120}
+              width={200}
+              height={60}
+              fit="contain"
             />
-          </Group>
+          )}
         </Canvas>
         </GestureDetector>
       )}
