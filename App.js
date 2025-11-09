@@ -9,6 +9,9 @@ import {
   Circle,
   rect,
   rrect,
+  ColorMatrix,
+  Paint,
+  Skia,
 } from '@shopify/react-native-skia';
 import {
   useSharedValue,
@@ -45,8 +48,14 @@ const App = () => {
   const [gameState, setGameState] = useState('waiting'); // 'waiting', 'playing', 'gameOver'
   const [birdColor, setBirdColor] = useState('yellow'); // 'yellow', 'blue', 'red', 'custom'
   const [customImageUri, setCustomImageUri] = useState(null);
+  const [theme, setTheme] = useState('day'); // 'day', 'night', 'city'
 
-  const bg = useImage(require('./assets/sprites/background-day.png'));
+  const bgDay = useImage(require('./assets/sprites/background-day.png'));
+  const bgNight = useImage(require('./assets/sprites/background-night.png'));
+  const bgCity = useImage(require('./assets/sprites/nightcity.jpg'));
+
+  // Get current background based on theme
+  const bg = theme === 'night' ? bgNight : theme === 'city' ? bgCity : bgDay;
   const yellowBird = useImage(require('./assets/sprites/yellowbird-upflap.png'));
   const blueBird = useImage(require('./assets/sprites/bluebird-upflap.png'));
   const redBird = useImage(require('./assets/sprites/redbird-upflap.png'));
@@ -96,6 +105,8 @@ const App = () => {
 
   // No audio setup needed - using Web Audio API directly
 
+  // No image processing - use original image directly
+
   // Pick custom image
   const pickImage = async () => {
     try {
@@ -107,6 +118,7 @@ const App = () => {
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {
+        // Use the image directly without processing
         setCustomImageUri(result.assets[0].uri);
         setBirdColor('custom');
         playJumpSound();
@@ -343,6 +355,34 @@ const App = () => {
       const tapX = event.x;
       const tapY = event.y;
 
+      // Check if tapping on theme buttons
+      const themeY = height - 340;
+      const themeRadius = 20;
+
+      // Day theme button
+      const dayX = width / 2 - 60;
+      if (Math.sqrt((tapX - dayX) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
+        runOnJS(setTheme)('day');
+        runOnJS(playJumpSound)();
+        return;
+      }
+
+      // Night theme button
+      const nightX = width / 2;
+      if (Math.sqrt((tapX - nightX) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
+        runOnJS(setTheme)('night');
+        runOnJS(playJumpSound)();
+        return;
+      }
+
+      // City theme button
+      const cityX = width / 2 + 60;
+      if (Math.sqrt((tapX - cityX) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
+        runOnJS(setTheme)('city');
+        runOnJS(playJumpSound)();
+        return;
+      }
+
       // Check if tapping on bird color buttons (bottom of screen)
       const buttonY = height - 200;
       const buttonSize = 60;
@@ -469,7 +509,7 @@ const App = () => {
           <Group transform={birdTransform} origin={birdOrigin}>
             {birdColor === 'custom' && customBird ? (
               <Group clip={birdClipPath}>
-                {/* Circular clipped custom bird */}
+                {/* Circular clipped custom bird with pixel art style and background removal */}
                 <Image
                   image={customBird}
                   y={birdY}
@@ -477,7 +517,16 @@ const App = () => {
                   width={48}
                   height={48}
                   fit="cover"
-                />
+                >
+                  <ColorMatrix
+                    matrix={[
+                      1.2, 0, 0, 0, 0,     // Red: boost contrast
+                      0, 1.2, 0, 0, 0,     // Green: boost contrast
+                      0, 0, 1.2, 0, 0,     // Blue: boost contrast
+                      0, 0, 0, 1.5, -0.3,  // Alpha: increase transparency on lighter pixels
+                    ]}
+                  />
+                </Image>
               </Group>
             ) : (
               <Image image={bird} y={birdY} x={birdX} width={64} height={48} />
@@ -504,6 +553,99 @@ const App = () => {
                 width={184}
                 height={267}
               />
+
+              {/* Theme Selector */}
+              <Group>
+                {/* Theme Header */}
+                <Text
+                  x={width / 2 - 45}
+                  y={height - 380}
+                  text="Theme:"
+                  font={mediumFont}
+                  color="#FFFFFF"
+                />
+
+                {/* Day Theme Button */}
+                <Group>
+                  <Circle
+                    cx={width / 2 - 60}
+                    cy={height - 340}
+                    r={20}
+                    color={theme === 'day' ? '#87CEEB' : 'rgba(135, 206, 235, 0.4)'}
+                  />
+                  {theme === 'day' && (
+                    <Circle
+                      cx={width / 2 - 60}
+                      cy={height - 340}
+                      r={22}
+                      style="stroke"
+                      strokeWidth={2}
+                      color="#FFD700"
+                    />
+                  )}
+                  <Text
+                    x={width / 2 - 72}
+                    y={height - 315}
+                    text="Day"
+                    font={smallFont}
+                    color="#FFFFFF"
+                  />
+                </Group>
+
+                {/* Night Theme Button */}
+                <Group>
+                  <Circle
+                    cx={width / 2}
+                    cy={height - 340}
+                    r={20}
+                    color={theme === 'night' ? '#1a1a2e' : 'rgba(26, 26, 46, 0.4)'}
+                  />
+                  {theme === 'night' && (
+                    <Circle
+                      cx={width / 2}
+                      cy={height - 340}
+                      r={22}
+                      style="stroke"
+                      strokeWidth={2}
+                      color="#FFD700"
+                    />
+                  )}
+                  <Text
+                    x={width / 2 - 17}
+                    y={height - 315}
+                    text="Night"
+                    font={smallFont}
+                    color="#FFFFFF"
+                  />
+                </Group>
+
+                {/* City Theme Button */}
+                <Group>
+                  <Circle
+                    cx={width / 2 + 60}
+                    cy={height - 340}
+                    r={20}
+                    color={theme === 'city' ? '#FF6B6B' : 'rgba(255, 107, 107, 0.4)'}
+                  />
+                  {theme === 'city' && (
+                    <Circle
+                      cx={width / 2 + 60}
+                      cy={height - 340}
+                      r={22}
+                      style="stroke"
+                      strokeWidth={2}
+                      color="#FFD700"
+                    />
+                  )}
+                  <Text
+                    x={width / 2 + 45}
+                    y={height - 315}
+                    text="City"
+                    font={smallFont}
+                    color="#FFFFFF"
+                  />
+                </Group>
+              </Group>
 
               {/* Bird Selection Title - Compact Card */}
               <Group>
