@@ -53,6 +53,7 @@ const App = () => {
   const scale = Math.min(scaleWidth, scaleHeight); // Use minimum to maintain aspect ratio
 
   const [score, setScore] = useState(0);
+  const [highestScore, setHighestScore] = useState(0);
   const [gameState, setGameState] = useState('waiting'); // 'waiting', 'playing', 'gameOver'
   const [birdColor, setBirdColor] = useState('manas'); // 'yellow', 'blue', 'red', 'manas', 'custom0', 'custom1', etc.
   const [customImages, setCustomImages] = useState([]); // Array of custom image URIs
@@ -115,6 +116,7 @@ const App = () => {
   const customizeBtn = useImage(require('./assets/sprites/customize_button.png'));
   const saveBtn = useImage(require('./assets/sprites/save_button.png'));
   const backBtn = useImage(require('./assets/sprites/back_button.png'));
+  const bestScoreImg = useImage(require('./assets/sprites/best_score.png'));
 
   // Text images
   const customizePt = useImage(require('./assets/sprites/customize_pt.png'));
@@ -179,9 +181,11 @@ const App = () => {
         const savedTheme = await AsyncStorage.getItem('theme');
         const savedBirdColor = await AsyncStorage.getItem('birdColor');
         const savedCustomImages = await AsyncStorage.getItem('customImages');
+        const savedHighestScore = await AsyncStorage.getItem('highestScore');
 
         if (savedTheme) setTheme(savedTheme);
         if (savedBirdColor) setBirdColor(savedBirdColor);
+        if (savedHighestScore) setHighestScore(parseInt(savedHighestScore));
         if (savedCustomImages) {
           const parsedImages = JSON.parse(savedCustomImages);
           // Convert from old object format to array if needed
@@ -495,6 +499,18 @@ const App = () => {
     }
   );
 
+  // Function to update highest score
+  const updateHighestScore = async (currentScore) => {
+    if (currentScore > highestScore) {
+      setHighestScore(currentScore);
+      try {
+        await AsyncStorage.setItem('highestScore', currentScore.toString());
+      } catch (error) {
+        console.log('Error saving highest score:', error);
+      }
+    }
+  };
+
   useAnimatedReaction(
     () => gameOver.value,
     (currentValue, previousValue) => {
@@ -502,6 +518,7 @@ const App = () => {
         cancelAnimation(pipeX);
         runOnJS(playHitSound)();
         runOnJS(setGameState)('gameOver');
+        runOnJS(updateHighestScore)(score);
       }
     }
   );
@@ -718,12 +735,12 @@ const App = () => {
     ];
   });
   const birdOrigin = useDerivedValue(() => {
-    return { x: width / 4 + 32, y: birdY.value + 24 };
+    return { x: width / 4 + 32 * scale, y: birdY.value + 24 * scale };
   });
 
   // Create circular clip for custom bird
   const birdClipPath = useDerivedValue(() => {
-    return rrect(rect(birdX, birdY.value, 48, 48), 24, 24);
+    return rrect(rect(birdX, birdY.value, 48 * scale, 48 * scale), 24 * scale, 24 * scale);
   });
 
   const fontFamily = Platform.select({ ios: 'Helvetica', default: 'serif' });
@@ -810,8 +827,8 @@ const App = () => {
                     image={bird}
                     y={birdY}
                     x={birdX}
-                    width={48}
-                    height={48}
+                    width={48 * scale}
+                    height={48 * scale}
                     fit="cover"
                   >
                     <ColorMatrix
@@ -825,24 +842,73 @@ const App = () => {
                   </Image>
                 </Group>
               ) : (
-                <Image image={bird} y={birdY} x={birdX} width={64} height={48} />
+                <Image image={bird} y={birdY} x={birdX} width={64 * scale} height={48 * scale} />
               )}
             </Group>
           )}
 
           {/* Score - only show when playing */}
           {gameState === 'playing' && (
-            <Text
-              x={width / 2 - 30}
-              y={100}
-              text={score.toString()}
-              font={font}
-            />
+            <>
+              {/* Current Score */}
+              <Text
+                x={width / 2 - 30 * scaleWidth}
+                y={100 * scaleHeight}
+                text={score.toString()}
+                font={font}
+              />
+            </>
           )}
 
           {/* Tap to Play Message - SCALED */}
           {gameState === 'waiting' && messageImg && (
             <>
+              {/* Highest Score - Image with number overlay - LEFT ALIGNED & SCALED (same as gameplay) */}
+              {bestScoreImg && (() => {
+                const imgWidth = 140 * scaleWidth;
+                const imgHeight = 140 * scaleHeight;
+                const imgX = 90 * scaleWidth;
+                const imgY = 140 * scaleHeight;
+
+                // Calculate text position to center the score number inside the image
+                const scoreText = highestScore.toString();
+                const charWidth = 12; // Character width in pixels
+                const textWidth = scoreText.length * charWidth * scaleWidth;
+                // Center text horizontally in the badge + move much more to the right
+                const textX = imgX + (imgWidth / 2) - (textWidth / 2) + (80 * scaleWidth);
+                // Position text vertically in center of badge (50% down + slight adjustment for visual center + 4px down)
+                const textY = imgY + (imgHeight / 2) + (12 * scaleHeight);
+
+                return (
+                  <>
+                    {/* Best Score Image */}
+                    <Image
+                      image={bestScoreImg}
+                      x={imgX}
+                      y={imgY}
+                      width={imgWidth}
+                      height={imgHeight}
+                      fit="contain"
+                    />
+                    {/* Score number on top of image - with shadow */}
+                    <Text
+                      x={textX + 1.5 * scaleWidth}
+                      y={textY + 1.5 * scaleHeight}
+                      text={scoreText}
+                      font={font}
+                      color="#000000"
+                    />
+                    <Text
+                      x={textX}
+                      y={textY}
+                      text={scoreText}
+                      font={font}
+                      color="#FFD700"
+                    />
+                  </>
+                );
+              })()}
+
               <Image
                 image={messageImg}
                 x={width / 2 - 92 * scaleWidth}
@@ -891,21 +957,104 @@ const App = () => {
                 />
               )}
 
-              {/* Final Score with shadow effect - SCALED */}
-              <Text
-                x={122 * scaleWidth}
-                y={250 * scaleHeight}
-                text={`Score: ${score}`}
-                font={font}
-                color="#000000"
-              />
-              <Text
-                x={120 * scaleWidth}
-                y={248 * scaleHeight}
-                text={`Score: ${score}`}
-                font={font}
-                color="#FFD700"
-              />
+              {/* Final Score with shadow effect - CENTERED & RESPONSIVE */}
+              {(() => {
+                const displayText = `Score: ${score}`;
+                // More accurate character width estimation: 13px per char scaled
+                const textWidth = displayText.length * 13 * scaleWidth;
+                const centerX = (width - textWidth) / 2;
+
+                return (
+                  <>
+                    <Text
+                      x={centerX + 2 * scaleWidth}
+                      y={230 * scaleHeight}
+                      text={displayText}
+                      font={font}
+                      color="#000000"
+                    />
+                    <Text
+                      x={centerX}
+                      y={228 * scaleHeight}
+                      text={displayText}
+                      font={font}
+                      color="#FFD700"
+                    />
+                  </>
+                );
+              })()}
+
+              {/* Highest Score - Image or New Record Text - CENTERED & RESPONSIVE */}
+              {(() => {
+                const isNewRecord = score > highestScore;
+
+                if (isNewRecord) {
+                  // Show "NEW RECORD!" text
+                  const displayText = "* NEW RECORD! *";
+                  const textWidth = displayText.length * 13 * scaleWidth;
+                  const centerX = (width - textWidth) / 2;
+
+                  return (
+                    <>
+                      <Text
+                        x={centerX + 2 * scaleWidth}
+                        y={282 * scaleHeight}
+                        text={displayText}
+                        font={font}
+                        color="#000000"
+                      />
+                      <Text
+                        x={centerX}
+                        y={280 * scaleHeight}
+                        text={displayText}
+                        font={font}
+                        color="#FF4444"
+                      />
+                    </>
+                  );
+                } else if (bestScoreImg) {
+                  // Show best score image with number
+                  const imgWidth = 140 * scaleWidth;
+                  const imgHeight = 140 * scaleHeight;
+                  const imgX = width / 2 - imgWidth / 2;
+                  const imgY = 270 * scaleHeight;
+
+                  const scoreText = highestScore.toString();
+                  const charWidth = 12; // Character width in pixels
+                  const textWidth = scoreText.length * charWidth * scaleWidth;
+                  // Center text horizontally in the badge
+                  const textX = imgX + (imgWidth / 2) - (textWidth / 2);
+                  // Position text vertically in center of badge (50% down + slight adjustment for visual center)
+                  const textY = imgY + (imgHeight / 2) + (8 * scaleHeight);
+
+                  return (
+                    <>
+                      <Image
+                        image={bestScoreImg}
+                        x={imgX}
+                        y={imgY}
+                        width={imgWidth}
+                        height={imgHeight}
+                        fit="contain"
+                      />
+                      <Text
+                        x={textX + 1.5 * scaleWidth}
+                        y={textY + 1.5 * scaleHeight}
+                        text={scoreText}
+                        font={font}
+                        color="#000000"
+                      />
+                      <Text
+                        x={textX}
+                        y={textY}
+                        text={scoreText}
+                        font={font}
+                        color="#FFD700"
+                      />
+                    </>
+                  );
+                }
+              })()}
 
               {/* Restart Game Button - SCALED */}
               {restartGameBtn && (

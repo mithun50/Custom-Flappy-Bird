@@ -4,12 +4,12 @@
     "slug": "FlappyBird",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo_bird.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logo_bird.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#70c5ce"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -18,13 +18,14 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.master.supercat",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/logo_bird.png",
+        "backgroundColor": "#70c5ce"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logo_bird.png"
     }
   }
 }
