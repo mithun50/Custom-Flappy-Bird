@@ -35,6 +35,7 @@ import {
 } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GRAVITY = 1000;
 const JUMP_FORCE = -500;
@@ -49,6 +50,7 @@ const App = () => {
   const [birdColor, setBirdColor] = useState('yellow'); // 'yellow', 'blue', 'red', 'custom'
   const [customImageUri, setCustomImageUri] = useState(null);
   const [theme, setTheme] = useState('day'); // 'day', 'night', 'city'
+  const [currentPage, setCurrentPage] = useState('game'); // 'game', 'customize'
 
   const bgDay = useImage(require('./assets/sprites/background-day.png'));
   const bgNight = useImage(require('./assets/sprites/background-night.png'));
@@ -106,6 +108,40 @@ const App = () => {
   // No audio setup needed - using Web Audio API directly
 
   // No image processing - use original image directly
+
+  // Load saved preferences on app start
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem('theme');
+        const savedBirdColor = await AsyncStorage.getItem('birdColor');
+        const savedCustomImageUri = await AsyncStorage.getItem('customImageUri');
+
+        if (savedTheme) setTheme(savedTheme);
+        if (savedBirdColor) setBirdColor(savedBirdColor);
+        if (savedCustomImageUri) setCustomImageUri(savedCustomImageUri);
+      } catch (error) {
+        console.log('Error loading preferences:', error);
+      }
+    };
+
+    loadPreferences();
+  }, []);
+
+  // Save preferences
+  const savePreferences = async () => {
+    try {
+      await AsyncStorage.setItem('theme', theme);
+      await AsyncStorage.setItem('birdColor', birdColor);
+      if (customImageUri) {
+        await AsyncStorage.setItem('customImageUri', customImageUri);
+      }
+      playJumpSound();
+      setCurrentPage('game'); // Return to game after saving
+    } catch (error) {
+      console.log('Error saving preferences:', error);
+    }
+  };
 
   // Pick custom image
   const pickImage = async () => {
@@ -355,59 +391,10 @@ const App = () => {
       const tapX = event.x;
       const tapY = event.y;
 
-      // Check if tapping on theme buttons
-      const themeY = height - 340;
-      const themeRadius = 20;
-
-      // Day theme button
-      const dayX = width / 2 - 60;
-      if (Math.sqrt((tapX - dayX) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
-        runOnJS(setTheme)('day');
+      // Check if tapping on Customize button
+      if (tapX >= width / 2 - 80 && tapX <= width / 2 + 80 && tapY >= height - 100 && tapY <= height - 50) {
+        runOnJS(setCurrentPage)('customize');
         runOnJS(playJumpSound)();
-        return;
-      }
-
-      // Night theme button
-      const nightX = width / 2;
-      if (Math.sqrt((tapX - nightX) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
-        runOnJS(setTheme)('night');
-        runOnJS(playJumpSound)();
-        return;
-      }
-
-      // City theme button
-      const cityX = width / 2 + 60;
-      if (Math.sqrt((tapX - cityX) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
-        runOnJS(setTheme)('city');
-        runOnJS(playJumpSound)();
-        return;
-      }
-
-      // Check if tapping on bird color buttons (bottom of screen)
-      const buttonY = height - 200;
-      const buttonSize = 60;
-
-      // Yellow bird button
-      if (tapX >= 40 && tapX <= 40 + buttonSize && tapY >= buttonY && tapY <= buttonY + buttonSize) {
-        runOnJS(setBirdColor)('yellow');
-        runOnJS(playJumpSound)();
-        return;
-      }
-      // Blue bird button
-      if (tapX >= 120 && tapX <= 120 + buttonSize && tapY >= buttonY && tapY <= buttonY + buttonSize) {
-        runOnJS(setBirdColor)('blue');
-        runOnJS(playJumpSound)();
-        return;
-      }
-      // Red bird button
-      if (tapX >= 200 && tapX <= 200 + buttonSize && tapY >= buttonY && tapY <= buttonY + buttonSize) {
-        runOnJS(setBirdColor)('red');
-        runOnJS(playJumpSound)();
-        return;
-      }
-      // Custom image button (+ icon)
-      if (tapX >= 280 && tapX <= 280 + buttonSize && tapY >= buttonY && tapY <= buttonY + buttonSize) {
-        runOnJS(pickImage)();
         return;
       }
 
@@ -422,6 +409,83 @@ const App = () => {
     } else if (gameState === 'gameOver') {
       // Restart
       restartGame();
+    }
+  });
+
+  // Customize page gesture handler
+  const customizeGesture = Gesture.Tap().onStart((event) => {
+    'worklet';
+    const tapX = event.x;
+    const tapY = event.y;
+
+    // Theme buttons
+    const themeY = 250;
+    const themeRadius = 30;
+
+    // Day theme
+    if (Math.sqrt((tapX - (width / 2 - 80)) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
+      runOnJS(setTheme)('day');
+      runOnJS(playJumpSound)();
+      return;
+    }
+
+    // Night theme
+    if (Math.sqrt((tapX - (width / 2)) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
+      runOnJS(setTheme)('night');
+      runOnJS(playJumpSound)();
+      return;
+    }
+
+    // City theme
+    if (Math.sqrt((tapX - (width / 2 + 80)) ** 2 + (tapY - themeY) ** 2) <= themeRadius) {
+      runOnJS(setTheme)('city');
+      runOnJS(playJumpSound)();
+      return;
+    }
+
+    // Bird buttons
+    const birdY = 410;
+    const birdHeight = 52;
+    const birdWidth = 70;
+
+    // Yellow bird
+    if (tapX >= 40 && tapX <= 40 + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+      runOnJS(setBirdColor)('yellow');
+      runOnJS(playJumpSound)();
+      return;
+    }
+
+    // Blue bird
+    if (tapX >= 130 && tapX <= 130 + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+      runOnJS(setBirdColor)('blue');
+      runOnJS(playJumpSound)();
+      return;
+    }
+
+    // Red bird
+    if (tapX >= 220 && tapX <= 220 + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
+      runOnJS(setBirdColor)('red');
+      runOnJS(playJumpSound)();
+      return;
+    }
+
+    // Custom bird button
+    if (Math.sqrt((tapX - 330) ** 2 + (tapY - 436) ** 2) <= 35) {
+      runOnJS(pickImage)();
+      return;
+    }
+
+    // Save button
+    if (tapX >= width / 2 - 100 && tapX <= width / 2 + 100 && tapY >= height - 200 && tapY <= height - 140) {
+      runOnJS(savePreferences)();
+      return;
+    }
+
+    // Back button
+    if (tapX >= width / 2 - 100 && tapX <= width / 2 + 100 && tapY >= height - 120 && tapY <= height - 60) {
+      runOnJS(setCurrentPage)('game');
+      runOnJS(playJumpSound)();
+      return;
     }
   });
 
@@ -470,8 +534,9 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <GestureDetector gesture={gesture}>
-        <Canvas style={{ width, height }}>
+      {currentPage === 'game' ? (
+        <GestureDetector gesture={gesture}>
+          <Canvas style={{ width, height }}>
           {/* BG */}
           <Image image={bg} width={width} height={height} fit={'cover'} />
 
@@ -554,8 +619,25 @@ const App = () => {
                 height={267}
               />
 
-              {/* Theme Selector */}
+              {/* Customize Button */}
               <Group>
+                <Group clip={rrect(rect(width / 2 - 80, height - 100, 160, 50), 10, 10)}>
+                  <Circle cx={width / 2} cy={height - 75} r={80} color="#FFD700" />
+                </Group>
+                <Group clip={rrect(rect(width / 2 - 80, height - 100, 160, 50), 10, 10)} style="stroke">
+                  <Circle cx={width / 2} cy={height - 75} r={80} color="#FFFFFF" style="stroke" strokeWidth={3} />
+                </Group>
+                <Text
+                  x={width / 2 - 55}
+                  y={height - 72}
+                  text="Customize"
+                  font={mediumFont}
+                  color="#000000"
+                />
+              </Group>
+
+              {/* OLD - Theme Selector (REMOVED) */}
+              <Group style={{ opacity: 0 }}>
                 {/* Theme Header */}
                 <Text
                   x={width / 2 - 45}
@@ -894,6 +976,345 @@ const App = () => {
           )}
         </Canvas>
       </GestureDetector>
+      ) : (
+        <GestureDetector gesture={customizeGesture}>
+          <Canvas style={{ width, height }}>
+          {/* Customization Page Background */}
+          <Image image={bg} width={width} height={height} fit={'cover'} />
+
+          {/* Page Title */}
+          <Group>
+            <Text
+              x={width / 2 - 100}
+              y={80}
+              text="Customize"
+              font={font}
+              color="#000000"
+            />
+            <Text
+              x={width / 2 - 102}
+              y={78}
+              text="Customize"
+              font={font}
+              color="#FFD700"
+            />
+          </Group>
+
+          {/* Theme Section */}
+          <Group>
+            <Text
+              x={50}
+              y={180}
+              text="Select Theme:"
+              font={mediumFont}
+              color="#FFFFFF"
+            />
+
+            {/* Day Theme */}
+            <Group>
+              <Circle
+                cx={width / 2 - 80}
+                cy={250}
+                r={30}
+                color={theme === 'day' ? '#87CEEB' : 'rgba(135, 206, 235, 0.4)'}
+              />
+              {theme === 'day' && (
+                <Circle
+                  cx={width / 2 - 80}
+                  cy={250}
+                  r={33}
+                  style="stroke"
+                  strokeWidth={3}
+                  color="#FFD700"
+                />
+              )}
+              <Text
+                x={width / 2 - 95}
+                y={290}
+                text="Day"
+                font={smallFont}
+                color="#FFFFFF"
+              />
+            </Group>
+
+            {/* Night Theme */}
+            <Group>
+              <Circle
+                cx={width / 2}
+                cy={250}
+                r={30}
+                color={theme === 'night' ? '#1a1a2e' : 'rgba(26, 26, 46, 0.4)'}
+              />
+              {theme === 'night' && (
+                <Circle
+                  cx={width / 2}
+                  cy={250}
+                  r={33}
+                  style="stroke"
+                  strokeWidth={3}
+                  color="#FFD700"
+                />
+              )}
+              <Text
+                x={width / 2 - 20}
+                y={290}
+                text="Night"
+                font={smallFont}
+                color="#FFFFFF"
+              />
+            </Group>
+
+            {/* City Theme */}
+            <Group>
+              <Circle
+                cx={width / 2 + 80}
+                cy={250}
+                r={30}
+                color={theme === 'city' ? '#FF6B6B' : 'rgba(255, 107, 107, 0.4)'}
+              />
+              {theme === 'city' && (
+                <Circle
+                  cx={width / 2 + 80}
+                  cy={250}
+                  r={33}
+                  style="stroke"
+                  strokeWidth={3}
+                  color="#FFD700"
+                />
+              )}
+              <Text
+                x={width / 2 + 65}
+                y={290}
+                text="City"
+                font={smallFont}
+                color="#FFFFFF"
+              />
+            </Group>
+          </Group>
+
+          {/* Bird Section */}
+          <Group>
+            <Text
+              x={50}
+              y={360}
+              text="Select Bird:"
+              font={mediumFont}
+              color="#FFFFFF"
+            />
+
+            {/* Yellow Bird */}
+            <Group>
+              {yellowBird && (
+                <>
+                  {birdColor === 'yellow' && (
+                    <Group opacity={0.3}>
+                      <Image
+                        image={yellowBird}
+                        x={40}
+                        y={410}
+                        width={70}
+                        height={52}
+                      />
+                    </Group>
+                  )}
+                  <Image
+                    image={yellowBird}
+                    x={40}
+                    y={410}
+                    width={70}
+                    height={52}
+                    opacity={birdColor === 'yellow' ? 1 : 0.6}
+                  />
+                  {birdColor === 'yellow' && (
+                    <Circle
+                      cx={75}
+                      cy={436}
+                      r={40}
+                      style="stroke"
+                      strokeWidth={3}
+                      color="#FFD700"
+                    />
+                  )}
+                </>
+              )}
+            </Group>
+
+            {/* Blue Bird */}
+            <Group>
+              {blueBird && (
+                <>
+                  {birdColor === 'blue' && (
+                    <Group opacity={0.3}>
+                      <Image
+                        image={blueBird}
+                        x={130}
+                        y={410}
+                        width={70}
+                        height={52}
+                      />
+                    </Group>
+                  )}
+                  <Image
+                    image={blueBird}
+                    x={130}
+                    y={410}
+                    width={70}
+                    height={52}
+                    opacity={birdColor === 'blue' ? 1 : 0.6}
+                  />
+                  {birdColor === 'blue' && (
+                    <Circle
+                      cx={165}
+                      cy={436}
+                      r={40}
+                      style="stroke"
+                      strokeWidth={3}
+                      color="#FFD700"
+                    />
+                  )}
+                </>
+              )}
+            </Group>
+
+            {/* Red Bird */}
+            <Group>
+              {redBird && (
+                <>
+                  {birdColor === 'red' && (
+                    <Group opacity={0.3}>
+                      <Image
+                        image={redBird}
+                        x={220}
+                        y={410}
+                        width={70}
+                        height={52}
+                      />
+                    </Group>
+                  )}
+                  <Image
+                    image={redBird}
+                    x={220}
+                    y={410}
+                    width={70}
+                    height={52}
+                    opacity={birdColor === 'red' ? 1 : 0.6}
+                  />
+                  {birdColor === 'red' && (
+                    <Circle
+                      cx={255}
+                      cy={436}
+                      r={40}
+                      style="stroke"
+                      strokeWidth={3}
+                      color="#FFD700"
+                    />
+                  )}
+                </>
+              )}
+            </Group>
+
+            {/* Custom Bird */}
+            <Group>
+              {customBird && birdColor === 'custom' ? (
+                <>
+                  <Circle
+                    cx={330}
+                    cy={436}
+                    r={35}
+                    color="rgba(255, 255, 255, 0.3)"
+                  />
+                  <Group clip={rrect(rect(295, 401, 70, 70), 35, 35)}>
+                    <Image
+                      image={customBird}
+                      x={295}
+                      y={401}
+                      width={70}
+                      height={70}
+                      fit="cover"
+                    >
+                      <ColorMatrix
+                        matrix={[
+                          1.2, 0, 0, 0, 0,
+                          0, 1.2, 0, 0, 0,
+                          0, 0, 1.2, 0, 0,
+                          0, 0, 0, 1.5, -0.3,
+                        ]}
+                      />
+                    </Image>
+                  </Group>
+                  <Circle
+                    cx={330}
+                    cy={436}
+                    r={37}
+                    style="stroke"
+                    strokeWidth={3}
+                    color="#FFD700"
+                  />
+                </>
+              ) : (
+                <>
+                  <Circle
+                    cx={330}
+                    cy={436}
+                    r={35}
+                    color="rgba(255, 255, 255, 0.1)"
+                  />
+                  <Circle
+                    cx={330}
+                    cy={436}
+                    r={35}
+                    style="stroke"
+                    strokeWidth={2}
+                    color="rgba(255, 255, 255, 0.5)"
+                  />
+                  <Text
+                    x={318}
+                    y={449}
+                    text="+"
+                    font={font}
+                    color="#FFFFFF"
+                  />
+                </>
+              )}
+            </Group>
+          </Group>
+
+          {/* Save Button */}
+          <Group>
+            <Group clip={rrect(rect(width / 2 - 100, height - 200, 200, 60), 10, 10)}>
+              <Circle cx={width / 2} cy={height - 170} r={100} color="#4CAF50" />
+            </Group>
+            <Group clip={rrect(rect(width / 2 - 100, height - 200, 200, 60), 10, 10)} style="stroke">
+              <Circle cx={width / 2} cy={height - 170} r={100} color="#FFFFFF" style="stroke" strokeWidth={3} />
+            </Group>
+            <Text
+              x={width / 2 - 35}
+              y={height - 167}
+              text="SAVE"
+              font={mediumFont}
+              color="#FFFFFF"
+            />
+          </Group>
+
+          {/* Back Button */}
+          <Group>
+            <Group clip={rrect(rect(width / 2 - 100, height - 120, 200, 60), 10, 10)}>
+              <Circle cx={width / 2} cy={height - 90} r={100} color="#FF5722" />
+            </Group>
+            <Group clip={rrect(rect(width / 2 - 100, height - 120, 200, 60), 10, 10)} style="stroke">
+              <Circle cx={width / 2} cy={height - 90} r={100} color="#FFFFFF" style="stroke" strokeWidth={3} />
+            </Group>
+            <Text
+              x={width / 2 - 40}
+              y={height - 87}
+              text="BACK"
+              font={mediumFont}
+              color="#FFFFFF"
+            />
+          </Group>
+        </Canvas>
+        </GestureDetector>
+      )}
     </GestureHandlerRootView>
   );
 };
