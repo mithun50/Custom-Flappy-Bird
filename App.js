@@ -395,7 +395,7 @@ const App = () => {
       const tapY = event.y;
 
       // Check if tapping on Customize button
-      if (tapX >= width / 2 - 120 && tapX <= width / 2 + 120 && tapY >= height - 120 && tapY <= height - 40) {
+      if (tapX >= width / 2 - 120 && tapX <= width / 2 + 120 && tapY >= height / 2 + 150 && tapY <= height / 2 + 230) {
         runOnJS(setCurrentPage)('customize');
         runOnJS(playJumpSound)();
         return;
@@ -627,7 +627,7 @@ const App = () => {
                 <Image
                   image={customizeBtn}
                   x={width / 2 - 120}
-                  y={height - 120}
+                  y={height / 2 + 150}
                   width={240}
                   height={80}
                   fit="contain"
