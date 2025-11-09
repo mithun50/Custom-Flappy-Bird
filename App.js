@@ -634,18 +634,20 @@ const App = () => {
       return;
     }
 
-    // Custom bird buttons - 3 columns to fit all screens - SCALED
-    const birdSize = 70 * scale;
-    const spacing = (width - (3 * birdSize)) / 4;
+    // Custom bird buttons - 4 columns with proper spacing - SCALED
+    const birdSize = 60 * scale;
+    const totalWidth = width - 20 * scaleWidth;
+    const spacing = (totalWidth - (4 * birdSize)) / 5;
     const customPositions = [
-      spacing + birdSize / 2,
-      spacing + birdSize + spacing + birdSize / 2,
-      spacing + birdSize + spacing + birdSize + spacing + birdSize / 2
+      10 * scaleWidth + spacing + birdSize / 2,
+      10 * scaleWidth + spacing + birdSize + spacing + birdSize / 2,
+      10 * scaleWidth + spacing + birdSize + spacing + birdSize + spacing + birdSize / 2,
+      10 * scaleWidth + spacing + birdSize + spacing + birdSize + spacing + birdSize + spacing + birdSize / 2
     ];
-    const customBirdStartY = 536 * scaleHeight;
-    const customBirdRadius = 40 * scale;
-    const customBirdRowSpacing = 100 * scaleHeight;
-    const birdsPerRow = 3; // 3 columns instead of 4
+    const customBirdStartY = 530 * scaleHeight;
+    const customBirdRadius = 35 * scale; // Smaller radius for smaller birds
+    const customBirdRowSpacing = 110 * scaleHeight; // More spacing between rows
+    const birdsPerRow = 4; // 4 columns with better spacing
 
     // Check each existing custom bird
     for (let i = 0; i < customImages.length; i++) {
@@ -1241,18 +1243,20 @@ const App = () => {
 
             {/* Dynamic Custom Birds - below default birds, aligned with their positions - SCALED */}
             {customBirdImages.map((customBirdImg, index) => {
-              // Position to fit within screen bounds - 3 columns to prevent overflow
-              const birdSize = 70 * scale;
-              const spacing = (width - (3 * birdSize)) / 4; // Evenly distribute spacing
+              // Position to fit within screen bounds - 4 columns with proper spacing
+              const birdSize = 60 * scale; // Smaller birds
+              const totalWidth = width - 20 * scaleWidth; // Leave margins
+              const spacing = (totalWidth - (4 * birdSize)) / 5; // 5 gaps for 4 birds
               const positions = [
-                spacing + birdSize / 2,
-                spacing + birdSize + spacing + birdSize / 2,
-                spacing + birdSize + spacing + birdSize + spacing + birdSize / 2
+                10 * scaleWidth + spacing + birdSize / 2,
+                10 * scaleWidth + spacing + birdSize + spacing + birdSize / 2,
+                10 * scaleWidth + spacing + birdSize + spacing + birdSize + spacing + birdSize / 2,
+                10 * scaleWidth + spacing + birdSize + spacing + birdSize + spacing + birdSize + spacing + birdSize / 2
               ];
-              const col = index % 3; // 3 columns instead of 4
-              const row = Math.floor(index / 3);
+              const col = index % 4; // 4 columns with better spacing
+              const row = Math.floor(index / 4);
               const x = positions[col];
-              const y = 536 * scaleHeight + row * 100 * scaleHeight;
+              const y = 530 * scaleHeight + row * 110 * scaleHeight; // More vertical spacing
               const isSelected = birdColor === `custom${index}`;
 
               return (
@@ -1261,17 +1265,17 @@ const App = () => {
                     <Circle
                       cx={x}
                       cy={y}
-                      r={35 * scale}
+                      r={32 * scale}
                       color="rgba(255, 255, 255, 0.3)"
                     />
                   )}
-                  <Group clip={rrect(rect(x - 35 * scale, y - 35 * scale, 70 * scale, 70 * scale), 35 * scale, 35 * scale)}>
+                  <Group clip={rrect(rect(x - 30 * scale, y - 30 * scale, 60 * scale, 60 * scale), 30 * scale, 30 * scale)}>
                     <Image
                       image={customBirdImg}
-                      x={x - 35 * scale}
-                      y={y - 35 * scale}
-                      width={70 * scale}
-                      height={70 * scale}
+                      x={x - 30 * scale}
+                      y={y - 30 * scale}
+                      width={60 * scale}
+                      height={60 * scale}
                       fit="cover"
                       opacity={isSelected ? 1 : 0.6}
                     >
@@ -1314,12 +1318,20 @@ const App = () => {
             {/* Add new custom bird button - SCALED */}
             <Group>
               {(() => {
-                const positions = [75 * scaleWidth, 165 * scaleWidth, 255 * scaleWidth, 345 * scaleWidth];
+                const birdSize = 60 * scale;
+                const totalWidth = width - 20 * scaleWidth;
+                const spacing = (totalWidth - (4 * birdSize)) / 5;
+                const positions = [
+                  10 * scaleWidth + spacing + birdSize / 2,
+                  10 * scaleWidth + spacing + birdSize + spacing + birdSize / 2,
+                  10 * scaleWidth + spacing + birdSize + spacing + birdSize + spacing + birdSize / 2,
+                  10 * scaleWidth + spacing + birdSize + spacing + birdSize + spacing + birdSize + spacing + birdSize / 2
+                ];
                 const nextIndex = customImages.length;
                 const col = nextIndex % 4;
                 const row = Math.floor(nextIndex / 4);
                 const x = positions[col];
-                const y = 536 * scaleHeight + row * 100 * scaleHeight;
+                const y = 530 * scaleHeight + row * 110 * scaleHeight;
 
                 return (
                   <>
