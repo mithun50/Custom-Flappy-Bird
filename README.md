@@ -315,42 +315,113 @@ const pipesSpeed = useDerivedValue(() => {
 
 ## 👥 Development Team
 
+Meet the talented developers behind Custom Flappy Bird - a passionate team of React Native enthusiasts who brought this project to life with modern UI design, premium features, and meticulous attention to detail.
+
+### Team Members
+
 <table>
   <tr>
     <td align="center">
-      <img src="assets/sprites/developers/mithun.png" width="100px;" alt="Mithun Gowda B"/><br />
+      <img src="assets/sprites/developers/mithun.png" width="120px;" alt="Mithun Gowda B"/><br />
       <sub><b>Mithun Gowda B</b></sub><br />
-      <sub>Team Lead</sub><br />
-      <a href="https://instagram.com/mithun.gowda.b">Instagram</a>
+      <sub>🏆 Team Lead & Core Developer</sub><br />
+      <br />
+      <sub>Project architect and team lead responsible for overall system design, game logic implementation, and team coordination. Specialized in React Native development and high-performance animations.</sub><br />
+      <br />
+      <a href="https://github.com/mithun50">
+        <img src="https://img.shields.io/badge/GitHub-mithun50-181717?style=flat&logo=github" />
+      </a><br />
+      <a href="https://instagram.com/mithun.gowda.b">
+        <img src="https://img.shields.io/badge/Instagram-mithun.gowda.b-E4405F?style=flat&logo=instagram&logoColor=white" />
+      </a>
     </td>
     <td align="center">
-      <img src="assets/sprites/developers/harsha.png" width="100px;" alt="Harsha N"/><br />
+      <img src="assets/sprites/developers/harsha.png" width="120px;" alt="Harsha N"/><br />
       <sub><b>Harsha N</b></sub><br />
-      <sub>Developer - Design</sub><br />
-      <a href="https://instagram.com/harsha1218_">Instagram</a>
+      <sub>🎨 UI/UX Designer & Frontend Developer</sub><br />
+      <br />
+      <sub>Lead designer responsible for the premium UI cards, glassmorphic effects, and visual aesthetics. Created the beautiful development team showcase and customization interface.</sub><br />
+      <br />
+      <a href="https://github.com/harshaxyZ">
+        <img src="https://img.shields.io/badge/GitHub-harshaxyZ-181717?style=flat&logo=github" />
+      </a><br />
+      <a href="https://instagram.com/harsha1218_">
+        <img src="https://img.shields.io/badge/Instagram-harsha1218__-E4405F?style=flat&logo=instagram&logoColor=white" />
+      </a>
     </td>
     <td align="center">
-      <img src="assets/sprites/developers/manas.png" width="100px;" alt="Manas Habbu"/><br />
+      <img src="assets/sprites/developers/manas.png" width="120px;" alt="Manas Habbu"/><br />
       <sub><b>Manas Habbu</b></sub><br />
-      <sub>Developer - Design</sub><br />
-      <a href="https://instagram.com/manas.habbu13">Instagram</a>
+      <sub>🎨 Design Developer & Graphics Specialist</sub><br />
+      <br />
+      <sub>Graphics and design specialist who crafted the default bird character system, circular profile implementations, and visual effects. Focused on creating a cohesive design language throughout the app.</sub><br />
+      <br />
+      <a href="https://github.com/Manas-H13">
+        <img src="https://img.shields.io/badge/GitHub-Manas--H13-181717?style=flat&logo=github" />
+      </a><br />
+      <a href="https://instagram.com/manas.habbu13">
+        <img src="https://img.shields.io/badge/Instagram-manas.habbu13-E4405F?style=flat&logo=instagram&logoColor=white" />
+      </a>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="assets/sprites/developers/naren.png" width="100px;" alt="Naren V"/><br />
+      <img src="assets/sprites/developers/naren.png" width="120px;" alt="Naren V"/><br />
       <sub><b>Naren V</b></sub><br />
-      <sub>Developer - Logic</sub><br />
-      <a href="https://instagram.com/naren_vk_29">Instagram</a>
+      <sub>⚙️ Logic Developer & Backend Specialist</sub><br />
+      <br />
+      <sub>Core logic developer who implemented game physics, collision detection, and scoring systems. Specialized in performance optimization and worklet-based animations for smooth 60 FPS gameplay.</sub><br />
+      <br />
+      <a href="https://github.com/naren_vk_29">
+        <img src="https://img.shields.io/badge/GitHub-naren__vk__29-181717?style=flat&logo=github" />
+      </a><br />
+      <a href="https://instagram.com/naren_vk_29">
+        <img src="https://img.shields.io/badge/Instagram-naren__vk__29-E4405F?style=flat&logo=instagram&logoColor=white" />
+      </a>
     </td>
     <td align="center">
-      <img src="assets/sprites/developers/nevil.png" width="100px;" alt="Nevil D'Souza"/><br />
+      <img src="assets/sprites/developers/nevil.png" width="120px;" alt="Nevil D'Souza"/><br />
       <sub><b>Nevil D'Souza</b></sub><br />
-      <sub>Developer - Logic</sub><br />
-      <a href="https://instagram.com/_nevil_06">Instagram</a>
+      <sub>⚙️ Logic Developer & Features Engineer</sub><br />
+      <br />
+      <sub>Features engineer who developed the customization system, AsyncStorage integration, and custom character upload functionality. Implemented data persistence and state management solutions.</sub><br />
+      <br />
+      <a href="https://github.com/nevil06">
+        <img src="https://img.shields.io/badge/GitHub-nevil06-181717?style=flat&logo=github" />
+      </a><br />
+      <a href="https://instagram.com/_nevil_06">
+        <img src="https://img.shields.io/badge/Instagram-__nevil__06-E4405F?style=flat&logo=instagram&logoColor=white" />
+      </a>
+    </td>
+    <td align="center">
+      <sub><b>Join Our Team!</b></sub><br />
+      <sub>🚀 We're always looking for passionate developers</sub><br />
+      <br />
+      <sub>Interested in contributing to Custom Flappy Bird? Check out our <a href="#-contributing">Contributing Guidelines</a> and open a pull request!</sub><br />
+      <br />
+      <a href="https://github.com/mithun50/Custom-Flappy-Bird/issues">
+        <img src="https://img.shields.io/badge/Contribute-Welcome-brightgreen?style=flat" />
+      </a>
     </td>
   </tr>
 </table>
+
+### Team Contributions
+
+| Developer | Specialization | Key Contributions |
+|-----------|---------------|-------------------|
+| **Mithun Gowda B** | Team Lead, Architecture | Game engine, physics system, team coordination |
+| **Harsha N** | UI/UX Design | Premium cards, glassmorphic effects, visual design |
+| **Manas Habbu** | Graphics & Design | Default character system, circular profiles, design language |
+| **Naren V** | Game Logic | Collision detection, scoring system, performance optimization |
+| **Nevil D'Souza** | Features Engineering | Customization system, data persistence, state management |
+
+### Collaboration Tools
+- **Version Control**: Git & GitHub
+- **Communication**: Instagram, GitHub Discussions
+- **Project Management**: GitHub Issues & Projects
+- **Code Review**: Pull Request workflow
+- **Development**: React Native, Expo, VS Code
 
 ## 🐛 Known Issues & Limitations
 
