@@ -52,10 +52,14 @@ const App = () => {
   const scaleHeight = height / 800;
   const scale = Math.min(scaleWidth, scaleHeight); // Use minimum to maintain aspect ratio
 
+  // Scale pipe dimensions for responsive design
+  const scaledPipeWidth = pipeWidth * scaleWidth;
+  const scaledPipeHeight = pipeHeight * scaleHeight;
+
   const [score, setScore] = useState(0);
   const [highestScore, setHighestScore] = useState(0);
   const [gameState, setGameState] = useState('waiting'); // 'waiting', 'playing', 'gameOver'
-  const [birdColor, setBirdColor] = useState('manas'); // 'yellow', 'blue', 'red', 'manas', 'custom0', 'custom1', etc.
+  const [birdColor, setBirdColor] = useState('yellow'); // 'yellow', 'blue', 'red', 'manas', 'custom0', 'custom1', etc.
   const [customImages, setCustomImages] = useState([]); // Array of custom image URIs
   const [theme, setTheme] = useState('day'); // 'day', 'night', 'city'
   const [currentPage, setCurrentPage] = useState('game'); // 'game', 'customize', 'devteam'
@@ -126,10 +130,10 @@ const App = () => {
 
   // Get current bird based on selection
   const bird = birdColor.startsWith('custom')
-    ? customBirdImages[parseInt(birdColor.replace('custom', ''))] || manasBird
+    ? customBirdImages[parseInt(birdColor.replace('custom', ''))] || yellowBird
     : birdColor === 'blue' ? blueBird :
       birdColor === 'red' ? redBird :
-      birdColor === 'manas' ? manasBird : yellowBird;
+      yellowBird;
 
   // Debug log
   useEffect(() => {
@@ -146,8 +150,8 @@ const App = () => {
   const birdYVelocity = useSharedValue(0);
 
   const pipeOffset = useSharedValue(Math.random() * 400 * scaleHeight - 200 * scaleHeight); // Random initial gap position (scaled)
-  const topPipeY = useDerivedValue(() => pipeOffset.value - 320 * scaleHeight);
-  const bottomPipeY = useDerivedValue(() => height - 320 * scaleHeight + pipeOffset.value);
+  const topPipeY = useDerivedValue(() => pipeOffset.value - 350 * scaleHeight);
+  const bottomPipeY = useDerivedValue(() => height - 300 * scaleHeight + pipeOffset.value);
 
   const pipesSpeed = useDerivedValue(() => {
     return interpolate(score, [0, 20], [1, 2]);
@@ -158,15 +162,15 @@ const App = () => {
     {
       x: pipeX.value,
       y: bottomPipeY.value,
-      h: pipeHeight,
-      w: pipeWidth,
+      h: scaledPipeHeight,
+      w: scaledPipeWidth,
     },
     // top pipe
     {
       x: pipeX.value,
       y: topPipeY.value,
-      h: pipeHeight,
-      w: pipeWidth,
+      h: scaledPipeHeight,
+      w: scaledPipeWidth,
     },
   ]);
 
@@ -644,13 +648,6 @@ const App = () => {
       return;
     }
 
-    // Manas bird
-    if (tapX >= 270 * scaleWidth && tapX <= 270 * scaleWidth + birdWidth && tapY >= birdY && tapY <= birdY + birdHeight) {
-      runOnJS(setBirdColor)('manas');
-      runOnJS(playJumpSound)();
-      return;
-    }
-
     // Custom bird buttons - 4 columns with proper spacing - SCALED
     const birdSize = 60 * scale;
     const totalWidth = width - 20 * scaleWidth;
@@ -794,15 +791,15 @@ const App = () => {
                 image={pipeTop}
                 y={topPipeY}
                 x={pipeX}
-                width={pipeWidth}
-                height={pipeHeight}
+                width={scaledPipeWidth}
+                height={scaledPipeHeight}
               />
               <Image
                 image={pipeBottom}
                 y={bottomPipeY}
                 x={pipeX}
-                width={pipeWidth}
-                height={pipeHeight}
+                width={scaledPipeWidth}
+                height={scaledPipeHeight}
               />
             </>
           )}
@@ -817,10 +814,10 @@ const App = () => {
             fit={'cover'}
           />
 
-          {/* Bird */}
-          {bird && (
+          {/* Bird - only show when not in waiting state */}
+          {bird && gameState !== 'waiting' && (
             <Group transform={birdTransform} origin={birdOrigin}>
-              {(birdColor.startsWith('custom') || birdColor === 'manas') ? (
+              {birdColor.startsWith('custom') ? (
                 <Group clip={birdClipPath}>
                   {/* Circular clipped custom bird with pixel art style and background removal */}
                   <Image
@@ -1341,49 +1338,6 @@ const App = () => {
                   {birdColor === 'red' && (
                     <Circle
                       cx={220 * scaleWidth}
-                      cy={436 * scaleHeight}
-                      r={40 * scale}
-                      style="stroke"
-                      strokeWidth={3 * scale}
-                      color="#FFD700"
-                    />
-                  )}
-                </>
-              )}
-            </Group>
-
-            {/* Manas Bird - SCALED */}
-            <Group>
-              {manasBird && (
-                <>
-                  {birdColor === 'manas' && (
-                    <Group opacity={0.3}>
-                      <Group clip={rrect(rect(270 * scaleWidth, 401 * scaleHeight, 70 * scaleWidth, 70 * scaleHeight), 35 * scale, 35 * scale)}>
-                        <Image
-                          image={manasBird}
-                          x={270 * scaleWidth}
-                          y={401 * scaleHeight}
-                          width={70 * scaleWidth}
-                          height={70 * scaleHeight}
-                          fit="cover"
-                        />
-                      </Group>
-                    </Group>
-                  )}
-                  <Group clip={rrect(rect(270 * scaleWidth, 401 * scaleHeight, 70 * scaleWidth, 70 * scaleHeight), 35 * scale, 35 * scale)}>
-                    <Image
-                      image={manasBird}
-                      x={270 * scaleWidth}
-                      y={401 * scaleHeight}
-                      width={70 * scaleWidth}
-                      height={70 * scaleHeight}
-                      fit="cover"
-                      opacity={birdColor === 'manas' ? 1 : 0.6}
-                    />
-                  </Group>
-                  {birdColor === 'manas' && (
-                    <Circle
-                      cx={305 * scaleWidth}
                       cy={436 * scaleHeight}
                       r={40 * scale}
                       style="stroke"
